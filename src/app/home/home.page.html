@@ -23,9 +23,21 @@
         <p>No charging stations found.</p>
       </div>
     } @else {
-      <app-station-map [stations]="visibleStations()" (stationSelected)="onStationSelected($event)"></app-station-map>
+      <app-station-map
+        [stations]="visibleStations()"
+        [focusPoint]="focusPoint()"
+        (stationSelected)="onStationSelected($event)"
+        (locationFound)="onLocationFound()"
+        (locationError)="onLocationError($event)"
+      ></app-station-map>
 
       <div class="filter-overlay" [class.shift-for-panel]="isDesktop() && selectedStation() !== null">
+        <app-address-search (resultSelected)="onAddressSelected($event)"></app-address-search>
+
+        @if (locationMessage(); as message) {
+          <p class="notice" role="status">{{ message }}</p>
+        }
+
         <app-station-filter-bar
           [filters]="filters()"
           [connectorTypes]="connectorTypes()"

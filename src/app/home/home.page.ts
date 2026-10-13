@@ -17,6 +17,8 @@ import { mediaQuery } from '../core/ui/media-query';
 import { StationMapComponent } from '../features/map/station-map.component';
 import { StationDetailsComponent } from '../features/station-details/station-details.component';
 import { StationFilterBarComponent } from '../features/filters/station-filter-bar.component';
+import { AddressSearchComponent } from '../features/search/address-search.component';
+import { GeocodeResult } from '../core/services/geocoding.service';
 import { NO_FILTERS, StationFilters, connectorTypeNames, filterStations } from '../features/filters/station-filters';
 import { loadStationFilters, saveStationFilters } from '../features/filters/station-filter.storage';
 
@@ -39,6 +41,7 @@ const DESKTOP_QUERY = '(min-width: 768px)';
     StationMapComponent,
     StationDetailsComponent,
     StationFilterBarComponent,
+    AddressSearchComponent,
   ],
 })
 export class HomePage {
@@ -56,6 +59,11 @@ export class HomePage {
   protected readonly filters = signal<StationFilters>(loadStationFilters());
   protected readonly connectorTypes = computed(() => connectorTypeNames(this.stations() ?? []));
   protected readonly visibleStations = computed(() => filterStations(this.stations() ?? [], this.filters()));
+
+  /** Set after an address is picked. The map flies there and marks it. */
+  protected readonly focusPoint = signal<GeocodeResult | null>(null);
+  /** Shown under the search when the browser cannot provide the user's location. */
+  protected readonly locationMessage = signal<string | null>(null);
 
   constructor() {
     this.load();
@@ -98,5 +106,17 @@ export class HomePage {
 
   protected clearFilters(): void {
     this.filters.set(NO_FILTERS);
+  }
+
+  protected onAddressSelected(result: GeocodeResult): void {
+    this.focusPoint.set(result);
+  }
+
+  protected onLocationError(message: string): void {
+    this.locationMessage.set(message);
+  }
+
+  protected onLocationFound(): void {
+    this.locationMessage.set(null);
   }
 }

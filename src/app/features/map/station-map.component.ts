@@ -24,6 +24,26 @@ const CLUSTER_COUNT_LAYER = 'cluster-count';
 const POINT_LAYER = 'station-points';
 // Oslo city centre, the dataset is centred here
 const INITIAL_CENTER: [number, number] = [10.75, 59.92];
+const FOCUS_ZOOM = 15;
+
+export interface MapPoint {
+  latitude: number;
+  longitude: number;
+}
+
+/** Turns a browser geolocation error into a message the user can act on. */
+export function describeLocationError(error: { code: number } | undefined): string {
+  switch (error?.code) {
+    case 1: // PERMISSION_DENIED
+      return 'Location access is blocked. Allow it in your browser settings to show your position.';
+    case 2: // POSITION_UNAVAILABLE
+      return 'Your position could not be determined.';
+    case 3: // TIMEOUT
+      return 'Finding your position took too long. Try again.';
+    default:
+      return 'Could not get your location.';
+  }
+}
 
 @Component({
   selector: 'app-station-map',
@@ -32,11 +52,16 @@ const INITIAL_CENTER: [number, number] = [10.75, 59.92];
 })
 export class StationMapComponent implements OnDestroy {
   readonly stations = input.required<readonly Station[]>();
+  /** Moves the map to a searched address and marks it. */
+  readonly focusPoint = input<MapPoint | null>(null);
   readonly stationSelected = output<Station>();
+  readonly locationFound = output<void>();
+  readonly locationError = output<string>();
 
   private readonly container = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map: maplibregl.Map | null = null;
   private mapLoaded = false;
+  private searchMarker: maplibregl.Marker | null = null;
   // Fit the view to the stations only once, so later data updates do not move a view the user changed.
   private hasFitted = false;
   private collection: StationFeatureCollection = { type: 'FeatureCollection', features: [] };
@@ -49,9 +74,15 @@ export class StationMapComponent implements OnDestroy {
       this.collection = stationsToFeatureCollection(stations);
       this.pushData();
     });
+
+    effect(() => {
+      this.showFocusPoint(this.focusPoint());
+    });
   }
 
   ngOnDestroy(): void {
+    this.searchMarker?.remove();
+    this.searchMarker = null;
     this.map?.remove();
     this.map = null;
   }
@@ -64,8 +95,18 @@ export class StationMapComponent implements OnDestroy {
       center: INITIAL_CENTER,
       zoom: 11,
     });
-    // Bottom-left keeps the zoom buttons clear of the filter bar at the top.
+    // Bottom-left keeps the controls clear of the filter bar at the top.
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
+
+    // The browser asks for permission on the first click. Errors are reported to the page.
+    const geolocate = new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: false,
+      showUserLocation: true,
+    });
+    geolocate.on('geolocate', () => this.locationFound.emit());
+    geolocate.on('error', (event) => this.locationError.emit(describeLocationError(event)));
+    map.addControl(geolocate, 'bottom-left');
     this.map = map;
 
     map.on('load', () => {
@@ -157,6 +198,17 @@ export class StationMapComponent implements OnDestroy {
     // maxZoom stops a single station (or two close ones) from zooming in too far.
     map.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 0 });
     this.hasFitted = true;
+  }
+
+  private showFocusPoint(point: MapPoint | null): void {
+    this.searchMarker?.remove();
+    this.searchMarker = null;
+    if (!point || !this.map) {
+      return;
+    }
+    const center: [number, number] = [point.longitude, point.latitude];
+    this.searchMarker = new maplibregl.Marker({ color: '#3880ff' }).setLngLat(center).addTo(this.map);
+    this.map.flyTo({ center, zoom: FOCUS_ZOOM });
   }
 
   private async expandCluster(event: maplibregl.MapLayerMouseEvent): Promise<void> {

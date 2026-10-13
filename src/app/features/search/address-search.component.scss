@@ -1,0 +1,19 @@
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 12px 8px;
+  font-size: 14px;
+}
+
+.status p,
+p.status {
+  margin: 0;
+}
+
+.results {
+  max-height: 40vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+}
