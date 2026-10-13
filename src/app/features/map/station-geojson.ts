@@ -29,6 +29,31 @@ export function markerStatus(station: Station): MarkerStatus {
   return station.boxes.available > 0 ? 'available' : 'full';
 }
 
+/** [[minLng, minLat], [maxLng, maxLat]], the format MapLibre's fitBounds expects. */
+export type LngLatBounds = [[number, number], [number, number]];
+
+/** Bounding box of all stations, or null when there are none. */
+export function stationsBounds(stations: readonly Station[]): LngLatBounds | null {
+  if (stations.length === 0) {
+    return null;
+  }
+
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+  for (const station of stations) {
+    minLng = Math.min(minLng, station.longitude);
+    minLat = Math.min(minLat, station.latitude);
+    maxLng = Math.max(maxLng, station.longitude);
+    maxLat = Math.max(maxLat, station.latitude);
+  }
+  return [
+    [minLng, minLat],
+    [maxLng, maxLat],
+  ];
+}
+
 /**
  * Converts stations to a GeoJSON collection. Coordinates are [lng, lat] per the GeoJSON spec.
  * Kept as a pure function so it can be tested and reused without the map.

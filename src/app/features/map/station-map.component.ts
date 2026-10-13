@@ -11,7 +11,7 @@ import {
 import * as maplibregl from 'maplibre-gl';
 
 import { Station } from '../../core/models/station.model';
-import { StationFeatureCollection, stationsToFeatureCollection } from './station-geojson';
+import { StationFeatureCollection, stationsBounds, stationsToFeatureCollection } from './station-geojson';
 
 // Free vector style from OpenFreeMap. No API key is needed.
 export const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
@@ -37,6 +37,8 @@ export class StationMapComponent implements OnDestroy {
   private readonly container = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map: maplibregl.Map | null = null;
   private mapLoaded = false;
+  // Fit the view to the stations only once, so later data updates do not move a view the user changed.
+  private hasFitted = false;
   private collection: StationFeatureCollection = { type: 'FeatureCollection', features: [] };
 
   constructor() {
@@ -141,6 +143,19 @@ export class StationMapComponent implements OnDestroy {
     }
     const source = this.map.getSource<maplibregl.GeoJSONSource>(STATIONS_SOURCE);
     source?.setData(this.collection);
+    if (!this.hasFitted) {
+      this.fitToStations(this.map);
+    }
+  }
+
+  private fitToStations(map: maplibregl.Map): void {
+    const bounds = stationsBounds(this.stations());
+    if (!bounds) {
+      return;
+    }
+    // maxZoom stops a single station (or two close ones) from zooming in too far.
+    map.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 0 });
+    this.hasFitted = true;
   }
 
   private async expandCluster(event: maplibregl.MapLayerMouseEvent): Promise<void> {
