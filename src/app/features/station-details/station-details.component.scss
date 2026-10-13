@@ -1,0 +1,45 @@
+.details {
+  padding: 16px;
+  background-color: var(--ion-color-light);
+}
+
+.details-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.details-title h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  line-height: 26px;
+}
+
+.address {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 14px;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.state-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.state-block p {
+  margin: 0;
+}

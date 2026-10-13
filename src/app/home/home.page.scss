@@ -19,10 +19,15 @@ app-station-map {
   inset: 0;
 }
 
-.selected-card {
+.side-panel {
   position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 16px;
-  margin: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 100%;
+  overflow-y: auto;
+  background: var(--ion-background-color);
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+  z-index: 1;
 }

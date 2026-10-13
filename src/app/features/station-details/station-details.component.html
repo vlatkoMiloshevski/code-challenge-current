@@ -1,0 +1,102 @@
+<div class="details">
+  <header class="details-header">
+    <div class="details-title">
+      <h2>{{ station().name }}</h2>
+      <p class="address">{{ station().address }}, {{ station().postCode }} {{ station().town }}</p>
+    </div>
+    @if (showClose()) {
+      <ion-button fill="clear" (click)="closed.emit()" aria-label="Close station details">Close</ion-button>
+    }
+  </header>
+
+  <div class="summary">
+    <ion-badge [color]="station().isOpen ? 'success' : 'medium'">
+      {{ station().isOpen ? 'Open' : 'Closed' }}
+    </ion-badge>
+    <span>{{ station().boxes.available }} of {{ station().boxes.total }} available</span>
+    <span>{{ station().power.minKwh }}–{{ station().power.maxKwh }} kWh</span>
+  </div>
+
+  <ion-list lines="inset">
+    <ion-list-header><ion-label>Connectors</ion-label></ion-list-header>
+    @for (connector of station().connectors; track connector.type.id) {
+      <ion-item>
+        <ion-label>{{ connector.type.name }}</ion-label>
+        <ion-note slot="end">{{ connector.available }} / {{ connector.amount }} free</ion-note>
+      </ion-item>
+    } @empty {
+      <ion-item><ion-label>No connector information.</ion-label></ion-item>
+    }
+  </ion-list>
+
+  @if (loading()) {
+    <div class="state-block">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading charge points…</p>
+    </div>
+  } @else if (errorMessage(); as message) {
+    <div class="state-block">
+      <ion-text color="danger"><p>{{ message }}</p></ion-text>
+      <ion-button size="small" (click)="retry()">Try again</ion-button>
+    </div>
+  } @else if (detail(); as d) {
+    <ion-list lines="inset">
+      <ion-list-header><ion-label>Charge points</ion-label></ion-list-header>
+      @for (point of d.chargePoints; track point.id) {
+        <ion-item>
+          <ion-label>
+            <h3>{{ point.name }}</h3>
+            <p>{{ point.maxKw }} kW · {{ point.volts }} V · {{ point.chargerCode }}</p>
+            <p>{{ point.connectorTypes.map(c => c.name).join(', ') || 'No connector types' }}</p>
+          </ion-label>
+          <ion-badge slot="end" [color]="statusColor(point.status)">{{ point.status }}</ion-badge>
+        </ion-item>
+      } @empty {
+        <ion-item><ion-label>No charge points reported for this station.</ion-label></ion-item>
+      }
+    </ion-list>
+
+    <ion-list lines="inset">
+      <ion-list-header><ion-label>Pricing</ion-label></ion-list-header>
+      @if (d.pricing; as p) {
+        <ion-item>
+          <ion-label>Charging</ion-label>
+          <ion-note slot="end">{{ p.costPerKwh }} {{ p.currency }} / kWh</ion-note>
+        </ion-item>
+        <ion-item>
+          <ion-label>Start-up fee</ion-label>
+          <ion-note slot="end">{{ p.startupCost }} {{ p.currency }}</ion-note>
+        </ion-item>
+        <ion-item>
+          <ion-label>VAT</ion-label>
+          <ion-note slot="end">{{ p.vatPercent }}%</ion-note>
+        </ion-item>
+      } @else {
+        <ion-item><ion-label>Pricing not available.</ion-label></ion-item>
+      }
+    </ion-list>
+
+    <ion-list lines="inset">
+      <ion-list-header><ion-label>Operator</ion-label></ion-list-header>
+      <ion-item>
+        <ion-label>
+          <h3>{{ d.ownerName || station().operatorName }}</h3>
+          <p>{{ station().operatorName }}</p>
+        </ion-label>
+      </ion-item>
+      @if (d.support; as s) {
+        <ion-item [href]="telHref(s.phone)">
+          <ion-label>Phone</ion-label>
+          <ion-note slot="end">{{ s.phone }}</ion-note>
+        </ion-item>
+        <ion-item [href]="'mailto:' + s.email">
+          <ion-label>Email</ion-label>
+          <ion-note slot="end">{{ s.email }}</ion-note>
+        </ion-item>
+        <ion-item [href]="s.website" target="_blank" rel="noopener noreferrer">
+          <ion-label>Website</ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  }
+</div>

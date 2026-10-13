@@ -4,7 +4,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" [scrollY]="false">
+<ion-content [scrollY]="false">
   @if (loading()) {
     <div class="state-center">
       <ion-spinner name="crescent"></ion-spinner>
@@ -27,15 +27,26 @@
     }
   }
 
-  @if (selectedStation(); as station) {
-    <ion-card class="selected-card">
-      <ion-card-header>
-        <ion-card-title>{{ station.name }}</ion-card-title>
-        <ion-card-subtitle>{{ station.address }}, {{ station.town }}</ion-card-subtitle>
-      </ion-card-header>
-      <ion-card-content>
-        {{ station.boxes.available }} of {{ station.boxes.total }} available
-      </ion-card-content>
-    </ion-card>
+  @if (isDesktop() && selectedStation(); as station) {
+    <aside class="side-panel">
+      <app-station-details [station]="station" [showClose]="true" (closed)="closeDetails()"></app-station-details>
+    </aside>
   }
 </ion-content>
+
+@if (!isDesktop()) {
+  <ion-modal
+    [isOpen]="selectedStation() !== null"
+    [breakpoints]="[0, 0.5, 1]"
+    [initialBreakpoint]="0.5"
+    (didDismiss)="closeDetails()"
+  >
+    <ng-template>
+      <ion-content>
+        @if (selectedStation(); as station) {
+          <app-station-details [station]="station"></app-station-details>
+        }
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+}

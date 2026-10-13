@@ -2,13 +2,9 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   IonButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
   IonContent,
   IonHeader,
+  IonModal,
   IonSpinner,
   IonText,
   IonTitle,
@@ -17,7 +13,12 @@ import {
 
 import { StationApiService } from '../core/services/station-api.service';
 import { Station } from '../core/models/station.model';
+import { mediaQuery } from '../core/ui/media-query';
 import { StationMapComponent } from '../features/map/station-map.component';
+import { StationDetailsComponent } from '../features/station-details/station-details.component';
+
+/** Below this width the details open in an ion-modal instead of a side panel. */
+const DESKTOP_QUERY = '(min-width: 768px)';
 
 @Component({
   selector: 'app-home',
@@ -31,17 +32,16 @@ import { StationMapComponent } from '../features/map/station-map.component';
     IonSpinner,
     IonButton,
     IonText,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardSubtitle,
-    IonCardContent,
+    IonModal,
     StationMapComponent,
+    StationDetailsComponent,
   ],
 })
 export class HomePage {
   private readonly stationApi = inject(StationApiService);
   private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly isDesktop = mediaQuery(DESKTOP_QUERY);
 
   /** null until the first successful response. */
   protected readonly stations = signal<Station[] | null>(null);
@@ -73,7 +73,10 @@ export class HomePage {
   }
 
   protected onStationSelected(station: Station): void {
-    // Detail view is added in phase 4. For now the selection is only shown.
     this.selectedStation.set(station);
+  }
+
+  protected closeDetails(): void {
+    this.selectedStation.set(null);
   }
 }

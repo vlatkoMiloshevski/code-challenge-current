@@ -15,6 +15,9 @@ import { StationFeatureCollection, stationsToFeatureCollection } from './station
 
 // Free vector style from OpenFreeMap. No API key is needed.
 export const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+// MapLibre runs clustering in a web worker. The bundler does not emit that file, so it is
+// copied to assets (see angular.json) and its URL is set explicitly.
+const MAP_WORKER_URL = '/assets/maplibre/maplibre-gl-worker.mjs';
 const STATIONS_SOURCE = 'stations';
 const CLUSTER_LAYER = 'clusters';
 const CLUSTER_COUNT_LAYER = 'cluster-count';
@@ -52,6 +55,7 @@ export class StationMapComponent implements OnDestroy {
   }
 
   private initMap(): void {
+    maplibregl.setWorkerUrl(MAP_WORKER_URL);
     const map = new maplibregl.Map({
       container: this.container().nativeElement,
       style: MAP_STYLE_URL,
