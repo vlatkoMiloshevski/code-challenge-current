@@ -64,7 +64,8 @@ export class StationMapComponent implements OnDestroy {
       center: INITIAL_CENTER,
       zoom: 11,
     });
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    // Bottom-left keeps the zoom buttons clear of the filter bar at the top.
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
     this.map = map;
 
     map.on('load', () => {

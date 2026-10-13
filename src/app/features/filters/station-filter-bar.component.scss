@@ -1,0 +1,17 @@
+.chip-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 4px;
+  scrollbar-width: none;
+}
+
+.chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+ion-chip {
+  flex: 0 0 auto;
+  margin: 0;
+}

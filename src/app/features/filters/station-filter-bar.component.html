@@ -1,0 +1,29 @@
+<div class="chip-row" role="group" aria-label="Station filters">
+  @for (status of statusOptions; track status) {
+    <ion-chip
+      color="primary"
+      [outline]="!isStatusSelected(status)"
+      [attr.aria-pressed]="isStatusSelected(status)"
+      (click)="toggleStatus(status)"
+    >
+      <ion-label>{{ statusLabels[status] }}</ion-label>
+    </ion-chip>
+  }
+
+  @for (type of connectorTypes(); track type) {
+    <ion-chip
+      color="secondary"
+      [outline]="!isConnectorSelected(type)"
+      [attr.aria-pressed]="isConnectorSelected(type)"
+      (click)="toggleConnector(type)"
+    >
+      <ion-label>{{ type }}</ion-label>
+    </ion-chip>
+  }
+
+  @if (anyActive()) {
+    <ion-chip color="medium" (click)="clear()">
+      <ion-label>Clear</ion-label>
+    </ion-chip>
+  }
+</div>

@@ -23,7 +23,22 @@
         <p>No charging stations found.</p>
       </div>
     } @else {
-      <app-station-map [stations]="list" (stationSelected)="onStationSelected($event)"></app-station-map>
+      <app-station-map [stations]="visibleStations()" (stationSelected)="onStationSelected($event)"></app-station-map>
+
+      <div class="filter-overlay" [class.shift-for-panel]="isDesktop() && selectedStation() !== null">
+        <app-station-filter-bar
+          [filters]="filters()"
+          [connectorTypes]="connectorTypes()"
+          (filtersChange)="onFiltersChange($event)"
+        ></app-station-filter-bar>
+      </div>
+
+      @if (visibleStations().length === 0) {
+        <div class="no-match">
+          <p>No stations match the selected filters.</p>
+          <ion-button fill="outline" size="small" (click)="clearFilters()">Clear filters</ion-button>
+        </div>
+      }
     }
   }
 

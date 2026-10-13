@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   IonButton,
@@ -16,6 +16,9 @@ import { Station } from '../core/models/station.model';
 import { mediaQuery } from '../core/ui/media-query';
 import { StationMapComponent } from '../features/map/station-map.component';
 import { StationDetailsComponent } from '../features/station-details/station-details.component';
+import { StationFilterBarComponent } from '../features/filters/station-filter-bar.component';
+import { NO_FILTERS, StationFilters, connectorTypeNames, filterStations } from '../features/filters/station-filters';
+import { loadStationFilters, saveStationFilters } from '../features/filters/station-filter.storage';
 
 /** Below this width the details open in an ion-modal instead of a side panel. */
 const DESKTOP_QUERY = '(min-width: 768px)';
@@ -35,6 +38,7 @@ const DESKTOP_QUERY = '(min-width: 768px)';
     IonModal,
     StationMapComponent,
     StationDetailsComponent,
+    StationFilterBarComponent,
   ],
 })
 export class HomePage {
@@ -49,8 +53,14 @@ export class HomePage {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly selectedStation = signal<Station | null>(null);
 
+  protected readonly filters = signal<StationFilters>(loadStationFilters());
+  protected readonly connectorTypes = computed(() => connectorTypeNames(this.stations() ?? []));
+  protected readonly visibleStations = computed(() => filterStations(this.stations() ?? [], this.filters()));
+
   constructor() {
     this.load();
+
+    effect(() => saveStationFilters(this.filters()));
   }
 
   protected load(): void {
@@ -78,5 +88,15 @@ export class HomePage {
 
   protected closeDetails(): void {
     this.selectedStation.set(null);
+  }
+
+  protected onFiltersChange(filters: StationFilters): void {
+    this.filters.set(filters);
+    // Changing filters starts a new browsing context, so a previously opened station is closed.
+    this.closeDetails();
+  }
+
+  protected clearFilters(): void {
+    this.filters.set(NO_FILTERS);
   }
 }
