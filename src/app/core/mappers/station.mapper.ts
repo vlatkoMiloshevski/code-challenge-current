@@ -1,3 +1,4 @@
+import { StationApiError } from '../api/station-api.error';
 import {
   ChargePointDto,
   ConnectorTypeDto,
@@ -37,12 +38,20 @@ export function mapStationConnector(dto: StationConnectorDto): StationConnector 
   };
 }
 
+// Unknown values throw an 'invalid' StationApiError. The domain unions have no fallback
+// value, so an unexpected value is reported to the UI as an error state instead of being guessed.
 export function mapStationType(value: string): StationType {
-  return (STATION_TYPES as readonly string[]).includes(value) ? (value as StationType) : 'Other';
+  if (!(STATION_TYPES as readonly string[]).includes(value)) {
+    throw new StationApiError('invalid', `Unknown station type: "${value}".`);
+  }
+  return value as StationType;
 }
 
 export function mapChargePointStatus(value: string): ChargePointStatus {
-  return (CHARGE_POINT_STATUSES as readonly string[]).includes(value) ? (value as ChargePointStatus) : 'Unknown';
+  if (!(CHARGE_POINT_STATUSES as readonly string[]).includes(value)) {
+    throw new StationApiError('invalid', `Unknown charge point status: "${value}".`);
+  }
+  return value as ChargePointStatus;
 }
 
 export function mapStation(dto: StationDto): Station {

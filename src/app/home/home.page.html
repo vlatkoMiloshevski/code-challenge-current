@@ -1,20 +1,41 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <ion-title>Charging stations</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" [scrollY]="false">
+  @if (loading()) {
+    <div class="state-center">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading stations…</p>
+    </div>
+  } @else if (errorMessage(); as message) {
+    <div class="state-center">
+      <ion-text color="danger">
+        <p>{{ message }}</p>
+      </ion-text>
+      <ion-button (click)="load()">Try again</ion-button>
+    </div>
+  } @else if (stations(); as list) {
+    @if (list.length === 0) {
+      <div class="state-center">
+        <p>No charging stations found.</p>
+      </div>
+    } @else {
+      <app-station-map [stations]="list" (stationSelected)="onStationSelected($event)"></app-station-map>
+    }
+  }
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  @if (selectedStation(); as station) {
+    <ion-card class="selected-card">
+      <ion-card-header>
+        <ion-card-title>{{ station.name }}</ion-card-title>
+        <ion-card-subtitle>{{ station.address }}, {{ station.town }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        {{ station.boxes.available }} of {{ station.boxes.total }} available
+      </ion-card-content>
+    </ion-card>
+  }
 </ion-content>

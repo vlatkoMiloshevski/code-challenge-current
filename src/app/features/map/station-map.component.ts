@@ -1,0 +1,161 @@
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  afterNextRender,
+  effect,
+  input,
+  output,
+  viewChild,
+} from '@angular/core';
+import * as maplibregl from 'maplibre-gl';
+
+import { Station } from '../../core/models/station.model';
+import { StationFeatureCollection, stationsToFeatureCollection } from './station-geojson';
+
+// Free vector style from OpenFreeMap. No API key is needed.
+export const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+const STATIONS_SOURCE = 'stations';
+const CLUSTER_LAYER = 'clusters';
+const CLUSTER_COUNT_LAYER = 'cluster-count';
+const POINT_LAYER = 'station-points';
+// Oslo city centre, the dataset is centred here
+const INITIAL_CENTER: [number, number] = [10.75, 59.92];
+
+@Component({
+  selector: 'app-station-map',
+  templateUrl: 'station-map.component.html',
+  styleUrl: 'station-map.component.scss',
+})
+export class StationMapComponent implements OnDestroy {
+  readonly stations = input.required<readonly Station[]>();
+  readonly stationSelected = output<Station>();
+
+  private readonly container = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
+  private map: maplibregl.Map | null = null;
+  private mapLoaded = false;
+  private collection: StationFeatureCollection = { type: 'FeatureCollection', features: [] };
+
+  constructor() {
+    afterNextRender(() => this.initMap());
+
+    effect(() => {
+      const stations = this.stations();
+      this.collection = stationsToFeatureCollection(stations);
+      this.pushData();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.map?.remove();
+    this.map = null;
+  }
+
+  private initMap(): void {
+    const map = new maplibregl.Map({
+      container: this.container().nativeElement,
+      style: MAP_STYLE_URL,
+      center: INITIAL_CENTER,
+      zoom: 11,
+    });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    this.map = map;
+
+    map.on('load', () => {
+      this.addStationLayers(map);
+      this.mapLoaded = true;
+      this.pushData();
+    });
+
+    map.on('click', CLUSTER_LAYER, (event: maplibregl.MapLayerMouseEvent) => this.expandCluster(event));
+    map.on('click', POINT_LAYER, (event: maplibregl.MapLayerMouseEvent) => this.selectStation(event));
+    for (const layer of [CLUSTER_LAYER, POINT_LAYER]) {
+      map.on('mouseenter', layer, () => (map.getCanvas().style.cursor = 'pointer'));
+      map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''));
+    }
+  }
+
+  private addStationLayers(map: maplibregl.Map): void {
+    map.addSource(STATIONS_SOURCE, {
+      type: 'geojson',
+      data: this.collection,
+      cluster: true,
+      clusterMaxZoom: 14,
+      clusterRadius: 50,
+    });
+
+    map.addLayer({
+      id: CLUSTER_LAYER,
+      type: 'circle',
+      source: STATIONS_SOURCE,
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': ['step', ['get', 'point_count'], '#3880ff', 10, '#2dd36f', 50, '#ffc409'],
+        'circle-radius': ['step', ['get', 'point_count'], 18, 10, 24, 50, 32],
+        'circle-stroke-width': 3,
+        'circle-stroke-color': '#ffffff',
+      },
+    });
+
+    map.addLayer({
+      id: CLUSTER_COUNT_LAYER,
+      type: 'symbol',
+      source: STATIONS_SOURCE,
+      filter: ['has', 'point_count'],
+      layout: {
+        'text-field': ['get', 'point_count_abbreviated'],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 13,
+        'text-allow-overlap': true,
+      },
+      paint: { 'text-color': '#ffffff' },
+    });
+
+    map.addLayer({
+      id: POINT_LAYER,
+      type: 'circle',
+      source: STATIONS_SOURCE,
+      filter: ['!', ['has', 'point_count']],
+      paint: {
+        'circle-color': [
+          'match',
+          ['get', 'status'],
+          'available', '#2dd36f',
+          'full', '#eb445a',
+          /* closed */ '#8c8c8c',
+        ],
+        'circle-radius': 9,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff',
+      },
+    });
+  }
+
+  private pushData(): void {
+    if (!this.mapLoaded || !this.map) {
+      return;
+    }
+    const source = this.map.getSource<maplibregl.GeoJSONSource>(STATIONS_SOURCE);
+    source?.setData(this.collection);
+  }
+
+  private async expandCluster(event: maplibregl.MapLayerMouseEvent): Promise<void> {
+    const map = this.map;
+    const feature = event.features?.[0];
+    if (!map || !feature || feature.geometry.type !== 'Point') {
+      return;
+    }
+    const source = map.getSource<maplibregl.GeoJSONSource>(STATIONS_SOURCE);
+    const clusterId = feature.properties['cluster_id'] as number;
+    const zoom = await source?.getClusterExpansionZoom(clusterId);
+    map.easeTo({ center: feature.geometry.coordinates as [number, number], zoom });
+  }
+
+  private selectStation(event: maplibregl.MapLayerMouseEvent): void {
+    const id = event.features?.[0]?.properties['id'] as number | undefined;
+    const station = this.stations().find((s) => s.id === id);
+    if (station) {
+      this.stationSelected.emit(station);
+    }
+  }
+}

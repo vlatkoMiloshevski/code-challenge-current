@@ -2,22 +2,11 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
 
+import { StationApiError } from '../api/station-api.error';
 import { StationDetailResponseDto, StationListResponseDto } from '../api/station-api.dto';
 import { Station, StationDetail } from '../models/station.model';
 import { mapStation, mergeStationDetail } from '../mappers/station.mapper';
 import { STATION_API } from '../config/station-api.config';
-
-export type StationApiErrorKind = 'network' | 'server' | 'invalid' | 'unknown';
-
-export class StationApiError extends Error {
-  constructor(
-    readonly kind: StationApiErrorKind,
-    message: string,
-  ) {
-    super(message);
-    this.name = 'StationApiError';
-  }
-}
 
 @Injectable({ providedIn: 'root' })
 export class StationApiService {
