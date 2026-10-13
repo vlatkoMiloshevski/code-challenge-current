@@ -1,0 +1,7 @@
+{
+  "name": "code-challenge-current",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
