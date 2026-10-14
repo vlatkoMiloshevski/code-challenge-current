@@ -95,14 +95,14 @@ export class HomePage {
 
   protected readonly hasFavorites = computed(() => this.favorites.stationsInFavoritesView().size > 0);
   protected readonly connectorTypes = computed(() => connectorTypeNames(this.stations() ?? []));
-  /** The favorites view shows every favorite station and ignores the filters. */
+  /** Filters always apply. In the favorites view only favorite stations are kept, and they must also match the filters. */
   protected readonly visibleStations = computed(() => {
-    const all = this.stations() ?? [];
-    if (this.favoritesView()) {
-      const favoriteIds = this.favorites.stationsInFavoritesView();
-      return all.filter((station) => favoriteIds.has(station.id));
+    const matching = filterStations(this.stations() ?? [], this.filters());
+    if (!this.favoritesView()) {
+      return matching;
     }
-    return filterStations(all, this.filters());
+    const favoriteIds = this.favorites.stationsInFavoritesView();
+    return matching.filter((station) => favoriteIds.has(station.id));
   });
 
   constructor() {
