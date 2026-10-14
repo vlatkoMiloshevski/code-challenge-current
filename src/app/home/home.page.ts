@@ -164,6 +164,10 @@ export class HomePage {
 
   protected onSearchChanged(text: string): void {
     this.patchUrl({ q: text || null }, true);
+    // Clearing the search also clears the chosen address, so the map returns to its earlier view.
+    if (!text) {
+      this.focusPoint.set(null);
+    }
   }
 
   protected toggleFavoritesView(): void {

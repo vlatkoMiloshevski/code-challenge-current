@@ -1,3 +1,13 @@
+// Same text size as the favorites label and the filter labels (15px).
+ion-searchbar {
+  font-size: 15px;
+}
+
+// Ionic sets the font size on the inner input, so the input is targeted as well.
+:host ::ng-deep ion-searchbar .searchbar-input {
+  font-size: 15px;
+}
+
 .status {
   display: flex;
   align-items: center;

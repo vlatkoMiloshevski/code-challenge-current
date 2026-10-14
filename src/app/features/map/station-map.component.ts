@@ -71,6 +71,8 @@ export class StationMapComponent implements OnDestroy {
   // Fit the view to the stations only once, so later data updates do not move a view the user changed.
   private hasFitted = false;
   private lastViewKey: string | null = null;
+  // Camera position before the map flew to a searched address, restored when the search is cleared.
+  private viewBeforeFocus: { center: maplibregl.LngLat; zoom: number } | null = null;
   private collection: StationFeatureCollection = { type: 'FeatureCollection', features: [] };
 
   constructor() {
@@ -232,8 +234,20 @@ export class StationMapComponent implements OnDestroy {
   private showFocusPoint(point: MapPoint | null): void {
     this.searchMarker?.remove();
     this.searchMarker = null;
-    if (!point || !this.map) {
+    if (!this.map) {
       return;
+    }
+    if (!point) {
+      // The search was cleared: return to the view the map had before the address was picked.
+      if (this.viewBeforeFocus) {
+        this.map.flyTo(this.viewBeforeFocus);
+        this.viewBeforeFocus = null;
+      }
+      return;
+    }
+    // Remember the view only once, so choosing another address does not overwrite the original view.
+    if (!this.viewBeforeFocus) {
+      this.viewBeforeFocus = { center: this.map.getCenter(), zoom: this.map.getZoom() };
     }
     const center: [number, number] = [point.longitude, point.latitude];
     this.searchMarker = new maplibregl.Marker({ color: '#3880ff' }).setLngLat(center).addTo(this.map);
