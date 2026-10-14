@@ -21,9 +21,22 @@ export class StationFilterBarComponent {
   readonly connectorTypes = input.required<readonly string[]>();
   readonly filtersChange = output<StationFilters>();
 
+  /** Favorites chip below the filters. Counts are shown when there are starred items. */
+  readonly favoritesView = input(false);
+  readonly favoriteStationCount = input(0);
+  readonly favoriteConnectorCount = input(0);
+  readonly favoritesToggled = output<void>();
+
   protected readonly statusOptions = MARKER_STATUSES;
   protected readonly statusLabels = STATUS_LABELS;
   protected readonly anyActive = computed(() => hasActiveFilters(this.filters()));
+  protected readonly favoritesLabel = computed(() => {
+    const stations = this.favoriteStationCount();
+    const connectors = this.favoriteConnectorCount();
+    return stations + connectors > 0
+      ? `Favorites (stations: ${stations}, connectors: ${connectors})`
+      : 'Favorites';
+  });
 
   protected isStatusSelected(status: MarkerStatus): boolean {
     return this.filters().statuses.includes(status);

@@ -27,3 +27,14 @@
     </ion-chip>
   }
 </div>
+
+<div class="favorites-row">
+  <ion-chip
+    color="primary"
+    [outline]="!favoritesView()"
+    [attr.aria-pressed]="favoritesView()"
+    (click)="favoritesToggled.emit()"
+  >
+    <ion-label>{{ favoritesLabel() }}</ion-label>
+  </ion-chip>
+</div>

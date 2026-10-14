@@ -3,7 +3,6 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
   IonButton,
-  IonButtons,
   IonContent,
   IonHeader,
   IonModal,
@@ -50,7 +49,6 @@ const DESKTOP_QUERY = '(min-width: 768px)';
     IonHeader,
     IonToolbar,
     IonTitle,
-    IonButtons,
     IonContent,
     IonSpinner,
     IonButton,
@@ -67,7 +65,7 @@ export class HomePage {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly favorites = inject(FavoritesService);
+  protected readonly favorites = inject(FavoritesService);
 
   protected readonly isDesktop = mediaQuery(DESKTOP_QUERY);
 
@@ -96,13 +94,14 @@ export class HomePage {
 
   protected readonly hasFavorites = computed(() => this.favorites.stationsInFavoritesView().size > 0);
   protected readonly connectorTypes = computed(() => connectorTypeNames(this.stations() ?? []));
+  /** The favorites view shows every favorite station and ignores the filters. */
   protected readonly visibleStations = computed(() => {
-    const matching = filterStations(this.stations() ?? [], this.filters());
-    if (!this.favoritesView()) {
-      return matching;
+    const all = this.stations() ?? [];
+    if (this.favoritesView()) {
+      const favoriteIds = this.favorites.stationsInFavoritesView();
+      return all.filter((station) => favoriteIds.has(station.id));
     }
-    const favoriteIds = this.favorites.stationsInFavoritesView();
-    return matching.filter((station) => favoriteIds.has(station.id));
+    return filterStations(all, this.filters());
   });
 
   constructor() {

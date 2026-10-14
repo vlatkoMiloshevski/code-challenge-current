@@ -1,16 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>CURRENT</ion-title>
-    <ion-buttons slot="end">
-      <ion-button
-        size="small"
-        [fill]="favoritesView() ? 'solid' : 'outline'"
-        [attr.aria-pressed]="favoritesView()"
-        (click)="toggleFavoritesView()"
-      >
-        Favorites
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -35,6 +25,7 @@
     } @else {
       <app-station-map
         [stations]="visibleStations()"
+        [viewKey]="favoritesView() ? 'favorites' : 'all'"
         [focusPoint]="focusPoint()"
         (stationSelected)="onStationSelected($event)"
         (locationFound)="onLocationFound()"
@@ -55,7 +46,11 @@
         <app-station-filter-bar
           [filters]="filters()"
           [connectorTypes]="connectorTypes()"
+          [favoritesView]="favoritesView()"
+          [favoriteStationCount]="favorites.stationCount()"
+          [favoriteConnectorCount]="favorites.connectorCount()"
           (filtersChange)="onFiltersChange($event)"
+          (favoritesToggled)="toggleFavoritesView()"
         ></app-station-filter-bar>
       </div>
 

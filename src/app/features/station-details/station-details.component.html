@@ -22,9 +22,14 @@
   </header>
 
   <div class="summary">
-    <ion-badge [color]="station().isOpen ? 'success' : 'medium'">
-      {{ station().isOpen ? 'Open' : 'Closed' }}
-    </ion-badge>
+    <span
+      class="station-dot"
+      aria-hidden="true"
+      [class.marker-available]="markerStatusOf(station()) === 'available'"
+      [class.marker-full]="markerStatusOf(station()) === 'full'"
+      [class.marker-closed]="markerStatusOf(station()) === 'closed'"
+    ></span>
+    <ion-badge>{{ summaryLabel(station()) }}</ion-badge>
     <span>{{ station().boxes.available }} of {{ station().boxes.total }} available</span>
     <span>{{ station().power.minKwh }}–{{ station().power.maxKwh }} kWh</span>
   </div>

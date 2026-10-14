@@ -18,6 +18,10 @@ import { catchError, map, of, startWith, switchMap } from 'rxjs';
 import { StationApiService } from '../../core/services/station-api.service';
 import { Station, StationDetail } from '../../core/models/station.model';
 import { FavoritesService } from '../favorites/favorites.service';
+import { MarkerStatus, markerStatus } from '../map/station-geojson';
+
+// Same states as the map marker, so the panel and the marker always agree.
+const SUMMARY_LABELS = { available: 'Open', full: 'Full', closed: 'Closed' } as const;
 
 type DetailState =
   | { status: 'loading' }
@@ -84,6 +88,14 @@ export class StationDetailsComponent {
 
   protected retry(): void {
     this.attempt.update((n) => n + 1);
+  }
+
+  protected summaryLabel(station: Station): string {
+    return SUMMARY_LABELS[markerStatus(station)];
+  }
+
+  protected markerStatusOf(station: Station): MarkerStatus {
+    return markerStatus(station);
   }
 
   protected toggleStation(): void {

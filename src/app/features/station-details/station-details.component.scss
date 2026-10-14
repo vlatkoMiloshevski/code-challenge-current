@@ -23,6 +23,26 @@
   line-height: 26px;
 }
 
+// Status dot before the open/full/closed badge. Colors match the map markers.
+.station-dot {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.marker-available {
+  background: #2dd36f;
+}
+
+.marker-full {
+  background: #eb445a;
+}
+
+.marker-closed {
+  background: #8c8c8c;
+}
+
 // Name and favorite star stay together, the close button is pushed to the right.
 .details-name {
   display: flex;

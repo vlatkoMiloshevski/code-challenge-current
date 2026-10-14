@@ -19,6 +19,10 @@ export class FavoritesService {
     () => new Set([...this.stationIds(), ...this.chargePoints().map((point) => point.stationId)]),
   );
 
+  /** Number of starred stations and starred charge points, shown on the favorites button. */
+  readonly stationCount = computed(() => this.stationIds().length);
+  readonly connectorCount = computed(() => this.chargePoints().length);
+
   constructor() {
     const stored = loadFavorites();
     this.stationIds.set(stored.stations);

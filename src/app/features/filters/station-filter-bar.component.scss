@@ -24,6 +24,11 @@ ion-chip {
   border-radius: 6px;
 }
 
+// The favorites chip sits on its own row, under the filter chips.
+.favorites-row {
+  padding: 0 8px 8px;
+}
+
 // Pressed and hovered chips get darker, so the active state is visible while the button is held.
 ion-chip:hover,
 ion-chip:active {

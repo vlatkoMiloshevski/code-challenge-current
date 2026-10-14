@@ -6,6 +6,7 @@ import {
   effect,
   input,
   output,
+  untracked,
   viewChild,
 } from '@angular/core';
 import * as maplibregl from 'maplibre-gl';
@@ -54,6 +55,11 @@ export class StationMapComponent implements OnDestroy {
   readonly stations = input.required<readonly Station[]>();
   /** Moves the map to a searched address and marks it. */
   readonly focusPoint = input<MapPoint | null>(null);
+  /**
+   * Identifies the list being shown (for example "favorites" or "all"). When it changes,
+   * the map fits the new stations, so a switched view is not left off-screen.
+   */
+  readonly viewKey = input('');
   readonly stationSelected = output<Station>();
   readonly locationFound = output<void>();
   readonly locationError = output<string>();
@@ -64,6 +70,7 @@ export class StationMapComponent implements OnDestroy {
   private searchMarker: maplibregl.Marker | null = null;
   // Fit the view to the stations only once, so later data updates do not move a view the user changed.
   private hasFitted = false;
+  private lastViewKey: string | null = null;
   private collection: StationFeatureCollection = { type: 'FeatureCollection', features: [] };
 
   constructor() {
@@ -77,6 +84,20 @@ export class StationMapComponent implements OnDestroy {
 
     effect(() => {
       this.showFocusPoint(this.focusPoint());
+    });
+
+    effect(() => {
+      const key = this.viewKey();
+      untracked(() => {
+        const isFirstRun = this.lastViewKey === null;
+        if (key === this.lastViewKey) {
+          return;
+        }
+        this.lastViewKey = key;
+        if (!isFirstRun && this.map && this.mapLoaded) {
+          this.fitToStations(this.map);
+        }
+      });
     });
   }
 
@@ -196,7 +217,12 @@ export class StationMapComponent implements OnDestroy {
       return;
     }
     // maxZoom stops a single station (or two close ones) from zooming in too far.
-    map.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 0 });
+    // The top padding leaves room for the search and filter panel, so stations at the edge stay visible.
+    map.fitBounds(bounds, {
+      padding: { top: 160, bottom: 60, left: 40, right: 40 },
+      maxZoom: 13,
+      duration: 0,
+    });
     this.hasFitted = true;
   }
 
