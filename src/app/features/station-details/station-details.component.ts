@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -15,7 +16,7 @@ import {
 import { catchError, map, of, startWith, switchMap } from 'rxjs';
 
 import { StationApiService } from '../../core/services/station-api.service';
-import { ChargePointStatus, Station, StationDetail } from '../../core/models/station.model';
+import { Station, StationDetail } from '../../core/models/station.model';
 import { FavoritesService } from '../favorites/favorites.service';
 
 type DetailState =
@@ -28,6 +29,7 @@ type DetailState =
   templateUrl: 'station-details.component.html',
   styleUrl: 'station-details.component.scss',
   imports: [
+    DecimalPipe,
     IonButton,
     IonBadge,
     IonIcon,
@@ -47,6 +49,7 @@ export class StationDetailsComponent {
   // Ionic does not load icons by name from node_modules here, so the SVGs are copied to assets (see angular.json).
   protected readonly starIcon = '/assets/icons/star.svg';
   protected readonly starOutlineIcon = '/assets/icons/star-outline.svg';
+  protected readonly closeIcon = '/assets/icons/close.svg';
 
   readonly station = input.required<Station>();
   /** Shows a close button. Used by the desktop side panel. */
@@ -89,10 +92,6 @@ export class StationDetailsComponent {
 
   protected toggleChargePoint(chargePointId: number): void {
     this.favorites.toggleChargePoint(this.station().id, chargePointId);
-  }
-
-  protected statusColor(status: ChargePointStatus): string {
-    return status === 'Available' ? 'success' : 'warning';
   }
 
   /** Strips spaces so "+47 000 00 000" becomes a valid tel: link. */

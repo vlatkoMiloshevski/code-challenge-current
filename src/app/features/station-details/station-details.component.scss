@@ -5,21 +5,30 @@
 
 .details-header {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 4px;
+}
+
+// The station name, favorite star and close button share one line.
+.details-heading {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.details-actions {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.details-title h2 {
-  margin: 0 0 4px;
+.details-heading h2 {
+  margin: 0;
   font-size: 20px;
   line-height: 26px;
+}
+
+// Name and favorite star stay together, the close button is pushed to the right.
+.details-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
 }
 
 .address {
@@ -48,4 +57,83 @@
 
 .state-block p {
   margin: 0;
+}
+
+// Specification rows are shown one under another as "Label: value".
+.spec {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.spec-label {
+  color: var(--ion-color-medium);
+}
+
+// The title row holds the name, the status badge and the favorite star on one line.
+.point-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.point-title h3 {
+  margin: 0;
+}
+
+.point-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+// The star box is centered on the badge, but the glyph itself sits a little low next to the text.
+.point-actions ion-button ion-icon {
+  transform: translateY(-2px);
+}
+
+// Status and star sit against the right edge of the row. The button padding is pulled in so the glyph reaches the edge.
+.point-item {
+  --padding-end: 0;
+}
+
+.point-actions {
+  margin-right: -8px;
+}
+
+// Ionic badges are bold by default. The status text reads better in normal weight.
+// The station's open/closed badge keeps a border, so it reads as a status chip.
+.summary ion-badge {
+  border: 1px solid var(--ion-color-primary);
+}
+
+// Colored dot before the status text. The text stays primary, so the contrast is unchanged.
+// The badge is a flex row, so the dot is centered on the text line.
+ion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-available {
+  background: var(--ion-color-success);
+}
+
+.dot-preparing {
+  background: var(--ion-color-warning);
+}
+
+// Outlined badge: primary text on a neutral background keeps WCAG AA contrast in both themes.
+// The status word carries the meaning, so the badge does not rely on color alone.
+ion-badge {
+  font-weight: normal;
+  color: var(--ion-color-primary);
+  background: transparent;
 }

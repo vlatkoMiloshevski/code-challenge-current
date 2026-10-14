@@ -1,22 +1,24 @@
 <div class="details">
   <header class="details-header">
-    <div class="details-title">
-      <h2>{{ station().name }}</h2>
-      <p class="address">{{ station().address }}, {{ station().postCode }} {{ station().town }}</p>
-    </div>
-    <div class="details-actions">
-      <ion-button
-        fill="clear"
-        [attr.aria-pressed]="favorites.isStationFavorite(station().id)"
-        [attr.aria-label]="favorites.isStationFavorite(station().id) ? 'Remove station from favorites' : 'Add station to favorites'"
-        (click)="toggleStation()"
-      >
-        <ion-icon slot="icon-only" [src]="favorites.isStationFavorite(station().id) ? starIcon : starOutlineIcon"></ion-icon>
-      </ion-button>
+    <div class="details-heading">
+      <div class="details-name">
+        <h2>{{ station().name }}</h2>
+        <ion-button
+          fill="clear"
+          [attr.aria-pressed]="favorites.isStationFavorite(station().id)"
+          [attr.aria-label]="favorites.isStationFavorite(station().id) ? 'Remove station from favorites' : 'Add station to favorites'"
+          (click)="toggleStation()"
+        >
+          <ion-icon slot="icon-only" [src]="favorites.isStationFavorite(station().id) ? starIcon : starOutlineIcon"></ion-icon>
+        </ion-button>
+      </div>
       @if (showClose()) {
-        <ion-button fill="clear" (click)="closed.emit()" aria-label="Close station details">Close</ion-button>
+        <ion-button fill="outline" size="small" (click)="closed.emit()" aria-label="Close station details">
+          <ion-icon slot="icon-only" [src]="closeIcon"></ion-icon>
+        </ion-button>
       }
     </div>
+    <p class="address">{{ station().address }}, {{ station().postCode }} {{ station().town }}</p>
   </header>
 
   <div class="summary">
@@ -53,22 +55,36 @@
     <ion-list lines="inset">
       <ion-list-header><ion-label>Charge points</ion-label></ion-list-header>
       @for (point of d.chargePoints; track point.id) {
-        <ion-item>
+        <ion-item class="point-item">
           <ion-label>
-            <h3>{{ point.name }}</h3>
-            <p>{{ point.maxKw }} kW · {{ point.volts }} V · {{ point.chargerCode }}</p>
-            <p>{{ point.connectorTypes.map(c => c.name).join(', ') || 'No connector types' }}</p>
+            <div class="point-title">
+              <h3>{{ point.name }}</h3>
+              <div class="point-actions">
+                <ion-badge>
+                  <span
+                    class="status-dot"
+                    aria-hidden="true"
+                    [class.dot-available]="point.status === 'Available'"
+                    [class.dot-preparing]="point.status === 'Preparing'"
+                  ></span>
+                  {{ point.status }}
+                </ion-badge>
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  [attr.aria-pressed]="favorites.isChargePointFavorite(station().id, point.id)"
+                  [attr.aria-label]="favorites.isChargePointFavorite(station().id, point.id) ? 'Remove charge point from favorites' : 'Add charge point to favorites'"
+                  (click)="toggleChargePoint(point.id)"
+                >
+                  <ion-icon slot="icon-only" [src]="favorites.isChargePointFavorite(station().id, point.id) ? starIcon : starOutlineIcon"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+            <p class="spec"><span class="spec-label">Power:</span> {{ point.maxKw | number: '1.0-1' }} kW</p>
+            <p class="spec"><span class="spec-label">Voltage:</span> {{ point.volts }} V</p>
+            <p class="spec"><span class="spec-label">Charger code:</span> {{ point.chargerCode }}</p>
+            <p class="spec"><span class="spec-label">Connector:</span> {{ point.connectorTypes.map(c => c.name).join(', ') || 'None' }}</p>
           </ion-label>
-          <ion-badge slot="end" [color]="statusColor(point.status)">{{ point.status }}</ion-badge>
-          <ion-button
-            slot="end"
-            fill="clear"
-            [attr.aria-pressed]="favorites.isChargePointFavorite(station().id, point.id)"
-            [attr.aria-label]="favorites.isChargePointFavorite(station().id, point.id) ? 'Remove charge point from favorites' : 'Add charge point to favorites'"
-            (click)="toggleChargePoint(point.id)"
-          >
-            <ion-icon slot="icon-only" [src]="favorites.isChargePointFavorite(station().id, point.id) ? starIcon : starOutlineIcon"></ion-icon>
-          </ion-button>
         </ion-item>
       } @empty {
         <ion-item><ion-label>No charge points reported for this station.</ion-label></ion-item>

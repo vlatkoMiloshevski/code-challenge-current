@@ -46,6 +46,11 @@
                 "glob": "star-outline.svg",
                 "input": "node_modules/ionicons/dist/svg",
                 "output": "assets/icons"
+              },
+              {
+                "glob": "close.svg",
+                "input": "node_modules/ionicons/dist/svg",
+                "output": "assets/icons"
               }
             ],
             "styles": ["node_modules/maplibre-gl/dist/maplibre-gl.css", "src/global.scss", "src/theme/variables.scss"],
