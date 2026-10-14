@@ -15,6 +15,7 @@ import {
 import { StationApiService } from '../core/services/station-api.service';
 import { Station } from '../core/models/station.model';
 import { GeocodeResult } from '../core/services/geocoding.service';
+import { syntheticStationsFor } from '../core/dev/synthetic-stations';
 import { mediaQuery } from '../core/ui/media-query';
 import { StationMapComponent } from '../features/map/station-map.component';
 import { StationDetailsComponent } from '../features/station-details/station-details.component';
@@ -117,6 +118,15 @@ export class HomePage {
   protected load(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
+
+    // Dev only: ?synthetic=<count> replaces the API data with generated stations, for performance checks.
+    // In production builds this function always returns null (see synthetic-stations.prod.ts).
+    const synthetic = syntheticStationsFor(this.route.snapshot.queryParamMap.get('synthetic'));
+    if (synthetic) {
+      this.stations.set(synthetic);
+      this.loading.set(false);
+      return;
+    }
 
     this.stationApi
       .getStations()

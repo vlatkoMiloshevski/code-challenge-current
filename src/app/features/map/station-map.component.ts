@@ -115,6 +115,8 @@ export class StationMapComponent implements OnDestroy {
       style: MAP_STYLE_URL,
       center: INITIAL_CENTER,
       zoom: 11,
+      // Compact attribution keeps the zoom buttons visible on narrow screens.
+      attributionControl: { compact: true },
     });
     // Bottom-left keeps the controls clear of the filter bar at the top.
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
@@ -159,9 +161,10 @@ export class StationMapComponent implements OnDestroy {
       source: STATIONS_SOURCE,
       filter: ['has', 'point_count'],
       paint: {
-        'circle-color': ['step', ['get', 'point_count'], '#3880ff', 10, '#2dd36f', 50, '#ffc409'],
-        'circle-radius': ['step', ['get', 'point_count'], 18, 10, 24, 50, 32],
-        'circle-stroke-width': 3,
+        'circle-color': ['step', ['get', 'point_count'], '#3880ff', 10, '#2dd36f', 50, '#ffc409', 200, '#d79118', 1000, '#bb5fb5'],
+        // Smaller clusters, so dense areas with thousands of stations do not cover the map.
+        'circle-radius': ['step', ['get', 'point_count'], 16, 10, 18, 50, 20, 200, 22, 1000, 24],
+        'circle-stroke-width': 2,
         'circle-stroke-color': '#ffffff',
       },
     });
@@ -174,7 +177,7 @@ export class StationMapComponent implements OnDestroy {
       layout: {
         'text-field': ['get', 'point_count_abbreviated'],
         'text-font': ['Noto Sans Regular'],
-        'text-size': 13,
+        'text-size': 14,
         'text-allow-overlap': true,
       },
       paint: { 'text-color': '#ffffff' },
