@@ -1,6 +1,16 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Charging stations</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        size="small"
+        [fill]="favoritesView() ? 'solid' : 'outline'"
+        [attr.aria-pressed]="favoritesView()"
+        (click)="toggleFavoritesView()"
+      >
+        Favorites
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -32,7 +42,11 @@
       ></app-station-map>
 
       <div class="filter-overlay" [class.shift-for-panel]="isDesktop() && selectedStation() !== null">
-        <app-address-search (resultSelected)="onAddressSelected($event)"></app-address-search>
+        <app-address-search
+          [initialQuery]="searchText()"
+          (resultSelected)="onAddressSelected($event)"
+          (searchChanged)="onSearchChanged($event)"
+        ></app-address-search>
 
         @if (locationMessage(); as message) {
           <p class="notice" role="status">{{ message }}</p>
@@ -47,8 +61,14 @@
 
       @if (visibleStations().length === 0) {
         <div class="no-match">
-          <p>No stations match the selected filters.</p>
-          <ion-button fill="outline" size="small" (click)="clearFilters()">Clear filters</ion-button>
+          @if (favoritesView() && !hasFavorites()) {
+            <p>No favorites yet. Star a station or a charge point to see it here.</p>
+          } @else {
+            <p>No stations match the selected filters.</p>
+          }
+          @if (filtersActive()) {
+            <ion-button fill="outline" size="small" (click)="clearFilters()">Clear filters</ion-button>
+          }
         </div>
       }
     }

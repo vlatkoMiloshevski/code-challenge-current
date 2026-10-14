@@ -10,6 +10,12 @@
   gap: 8px;
 }
 
+.details-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .details-title h2 {
   margin: 0 0 4px;
   font-size: 20px;

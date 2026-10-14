@@ -4,9 +4,19 @@
       <h2>{{ station().name }}</h2>
       <p class="address">{{ station().address }}, {{ station().postCode }} {{ station().town }}</p>
     </div>
-    @if (showClose()) {
-      <ion-button fill="clear" (click)="closed.emit()" aria-label="Close station details">Close</ion-button>
-    }
+    <div class="details-actions">
+      <ion-button
+        fill="clear"
+        [attr.aria-pressed]="favorites.isStationFavorite(station().id)"
+        [attr.aria-label]="favorites.isStationFavorite(station().id) ? 'Remove station from favorites' : 'Add station to favorites'"
+        (click)="toggleStation()"
+      >
+        <ion-icon slot="icon-only" [src]="favorites.isStationFavorite(station().id) ? starIcon : starOutlineIcon"></ion-icon>
+      </ion-button>
+      @if (showClose()) {
+        <ion-button fill="clear" (click)="closed.emit()" aria-label="Close station details">Close</ion-button>
+      }
+    </div>
   </header>
 
   <div class="summary">
@@ -50,6 +60,15 @@
             <p>{{ point.connectorTypes.map(c => c.name).join(', ') || 'No connector types' }}</p>
           </ion-label>
           <ion-badge slot="end" [color]="statusColor(point.status)">{{ point.status }}</ion-badge>
+          <ion-button
+            slot="end"
+            fill="clear"
+            [attr.aria-pressed]="favorites.isChargePointFavorite(station().id, point.id)"
+            [attr.aria-label]="favorites.isChargePointFavorite(station().id, point.id) ? 'Remove charge point from favorites' : 'Add charge point to favorites'"
+            (click)="toggleChargePoint(point.id)"
+          >
+            <ion-icon slot="icon-only" [src]="favorites.isChargePointFavorite(station().id, point.id) ? starIcon : starOutlineIcon"></ion-icon>
+          </ion-button>
         </ion-item>
       } @empty {
         <ion-item><ion-label>No charge points reported for this station.</ion-label></ion-item>

@@ -3,6 +3,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   IonBadge,
   IonButton,
+  IonIcon,
   IonItem,
   IonLabel,
   IonList,
@@ -15,6 +16,7 @@ import { catchError, map, of, startWith, switchMap } from 'rxjs';
 
 import { StationApiService } from '../../core/services/station-api.service';
 import { ChargePointStatus, Station, StationDetail } from '../../core/models/station.model';
+import { FavoritesService } from '../favorites/favorites.service';
 
 type DetailState =
   | { status: 'loading' }
@@ -28,6 +30,7 @@ type DetailState =
   imports: [
     IonButton,
     IonBadge,
+    IonIcon,
     IonItem,
     IonLabel,
     IonList,
@@ -39,6 +42,11 @@ type DetailState =
 })
 export class StationDetailsComponent {
   private readonly stationApi = inject(StationApiService);
+  protected readonly favorites = inject(FavoritesService);
+
+  // Ionic does not load icons by name from node_modules here, so the SVGs are copied to assets (see angular.json).
+  protected readonly starIcon = '/assets/icons/star.svg';
+  protected readonly starOutlineIcon = '/assets/icons/star-outline.svg';
 
   readonly station = input.required<Station>();
   /** Shows a close button. Used by the desktop side panel. */
@@ -73,6 +81,14 @@ export class StationDetailsComponent {
 
   protected retry(): void {
     this.attempt.update((n) => n + 1);
+  }
+
+  protected toggleStation(): void {
+    this.favorites.toggleStation(this.station().id);
+  }
+
+  protected toggleChargePoint(chargePointId: number): void {
+    this.favorites.toggleChargePoint(this.station().id, chargePointId);
   }
 
   protected statusColor(status: ChargePointStatus): string {
