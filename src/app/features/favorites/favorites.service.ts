@@ -2,24 +2,15 @@ import { Injectable, computed, effect, signal } from '@angular/core';
 
 import { FavoriteChargePoint, loadFavorites, saveFavorites } from './favorites.storage';
 
-/**
- * Holds the favorite stations and charge points (connectors) of this browser.
- * Changes are saved to localStorage automatically.
- */
 @Injectable({ providedIn: 'root' })
 export class FavoritesService {
   private readonly stationIds = signal<number[]>([]);
   private readonly chargePoints = signal<FavoriteChargePoint[]>([]);
 
-  /**
-   * Station ids to show in the favorites view. That is a station that is starred itself,
-   * or one that holds a starred charge point.
-   */
   readonly stationsInFavoritesView = computed(
     () => new Set([...this.stationIds(), ...this.chargePoints().map((point) => point.stationId)]),
   );
 
-  /** Number of starred stations and starred charge points, shown on the favorites button. */
   readonly stationCount = computed(() => this.stationIds().length);
   readonly connectorCount = computed(() => this.chargePoints().length);
 

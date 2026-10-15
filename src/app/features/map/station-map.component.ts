@@ -14,16 +14,12 @@ import * as maplibregl from 'maplibre-gl';
 import { Station } from '../../core/models/station.model';
 import { StationFeatureCollection, stationsBounds, stationsToFeatureCollection } from './station-geojson';
 
-// Free vector style from OpenFreeMap. No API key is needed.
 export const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
-// MapLibre runs clustering in a web worker. The bundler does not emit that file, so it is
-// copied to assets (see angular.json) and its URL is set explicitly.
 const MAP_WORKER_URL = '/assets/maplibre/maplibre-gl-worker.mjs';
 const STATIONS_SOURCE = 'stations';
 const CLUSTER_LAYER = 'clusters';
 const CLUSTER_COUNT_LAYER = 'cluster-count';
 const POINT_LAYER = 'station-points';
-// Oslo city centre, the dataset is centred here
 const INITIAL_CENTER: [number, number] = [10.75, 59.92];
 const FOCUS_ZOOM = 15;
 
@@ -32,14 +28,13 @@ export interface MapPoint {
   longitude: number;
 }
 
-/** Turns a browser geolocation error into a message the user can act on. */
 export function describeLocationError(error: { code: number } | undefined): string {
   switch (error?.code) {
-    case 1: // PERMISSION_DENIED
+    case 1:
       return 'Location access is blocked. Allow it in your browser settings to show your position.';
-    case 2: // POSITION_UNAVAILABLE
+    case 2:
       return 'Your position could not be determined.';
-    case 3: // TIMEOUT
+    case 3:
       return 'Finding your position took too long. Try again.';
     default:
       return 'Could not get your location.';
@@ -53,12 +48,7 @@ export function describeLocationError(error: { code: number } | undefined): stri
 })
 export class StationMapComponent implements OnDestroy {
   readonly stations = input.required<readonly Station[]>();
-  /** Moves the map to a searched address and marks it. */
   readonly focusPoint = input<MapPoint | null>(null);
-  /**
-   * Identifies the list being shown (for example "favorites" or "all"). When it changes,
-   * the map fits the new stations, so a switched view is not left off-screen.
-   */
   readonly viewKey = input('');
   readonly stationSelected = output<Station>();
   readonly locationFound = output<void>();
@@ -68,10 +58,8 @@ export class StationMapComponent implements OnDestroy {
   private map: maplibregl.Map | null = null;
   private mapLoaded = false;
   private searchMarker: maplibregl.Marker | null = null;
-  // Fit the view to the stations only once, so later data updates do not move a view the user changed.
   private hasFitted = false;
   private lastViewKey: string | null = null;
-  // Camera position before the map flew to a searched address, restored when the search is cleared.
   private viewBeforeFocus: { center: maplibregl.LngLat; zoom: number } | null = null;
   private collection: StationFeatureCollection = { type: 'FeatureCollection', features: [] };
 
@@ -117,13 +105,10 @@ export class StationMapComponent implements OnDestroy {
       style: MAP_STYLE_URL,
       center: INITIAL_CENTER,
       zoom: 11,
-      // Compact attribution keeps the zoom buttons visible on narrow screens.
       attributionControl: { compact: true },
     });
-    // Bottom-left keeps the controls clear of the filter bar at the top.
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
 
-    // The browser asks for permission on the first click. Errors are reported to the page.
     const geolocate = new maplibregl.GeolocateControl({
       positionOptions: { enableHighAccuracy: true },
       trackUserLocation: false,
@@ -164,7 +149,6 @@ export class StationMapComponent implements OnDestroy {
       filter: ['has', 'point_count'],
       paint: {
         'circle-color': ['step', ['get', 'point_count'], '#3880ff', 10, '#2dd36f', 50, '#ffc409', 200, '#d79118', 1000, '#bb5fb5'],
-        // Smaller clusters, so dense areas with thousands of stations do not cover the map.
         'circle-radius': ['step', ['get', 'point_count'], 16, 10, 18, 50, 20, 200, 22, 1000, 24],
         'circle-stroke-width': 2,
         'circle-stroke-color': '#ffffff',
@@ -196,7 +180,7 @@ export class StationMapComponent implements OnDestroy {
           ['get', 'status'],
           'available', '#2dd36f',
           'full', '#eb445a',
-          /* closed */ '#8c8c8c',
+ '#8c8c8c',
         ],
         'circle-radius': 9,
         'circle-stroke-width': 2,
@@ -221,8 +205,6 @@ export class StationMapComponent implements OnDestroy {
     if (!bounds) {
       return;
     }
-    // maxZoom stops a single station (or two close ones) from zooming in too far.
-    // The top padding leaves room for the search and filter panel, so stations at the edge stay visible.
     map.fitBounds(bounds, {
       padding: { top: 160, bottom: 60, left: 40, right: 40 },
       maxZoom: 13,
@@ -238,14 +220,12 @@ export class StationMapComponent implements OnDestroy {
       return;
     }
     if (!point) {
-      // The search was cleared: return to the view the map had before the address was picked.
       if (this.viewBeforeFocus) {
         this.map.flyTo(this.viewBeforeFocus);
         this.viewBeforeFocus = null;
       }
       return;
     }
-    // Remember the view only once, so choosing another address does not overwrite the original view.
     if (!this.viewBeforeFocus) {
       this.viewBeforeFocus = { center: this.map.getCenter(), zoom: this.map.getZoom() };
     }

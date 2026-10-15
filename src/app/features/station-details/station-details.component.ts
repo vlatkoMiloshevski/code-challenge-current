@@ -20,7 +20,6 @@ import { Station, StationDetail } from '../../core/models/station.model';
 import { FavoritesService } from '../favorites/favorites.service';
 import { MarkerStatus, markerStatus } from '../map/station-geojson';
 
-// Same states as the map marker, so the panel and the marker always agree.
 const SUMMARY_LABELS = { available: 'Open', full: 'Full', closed: 'Closed' } as const;
 
 type DetailState =
@@ -50,19 +49,16 @@ export class StationDetailsComponent {
   private readonly stationApi = inject(StationApiService);
   protected readonly favorites = inject(FavoritesService);
 
-  // Ionic does not load icons by name from node_modules here, so the SVGs are copied to assets (see angular.json).
   protected readonly starIcon = '/assets/icons/star.svg';
   protected readonly starOutlineIcon = '/assets/icons/star-outline.svg';
   protected readonly closeIcon = '/assets/icons/close.svg';
 
   readonly station = input.required<Station>();
-  /** Shows a close button. Used by the desktop side panel. */
   readonly showClose = input(false);
   readonly closed = output<void>();
 
   private readonly attempt = signal(0);
 
-  // Reloads whenever the station changes or the user taps retry.
   private readonly state = toSignal(
     toObservable(computed(() => ({ station: this.station(), attempt: this.attempt() }))).pipe(
       switchMap(({ station }) =>
@@ -106,7 +102,6 @@ export class StationDetailsComponent {
     this.favorites.toggleChargePoint(this.station().id, chargePointId);
   }
 
-  /** Strips spaces so "+47 000 00 000" becomes a valid tel: link. */
   protected telHref(phone: string): string {
     return `tel:${phone.replace(/\s+/g, '')}`;
   }

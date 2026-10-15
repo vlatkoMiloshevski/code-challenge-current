@@ -15,10 +15,6 @@ export function hasActiveFilters(filters: StationFilters): boolean {
   return filters.statuses.length > 0 || filters.connectors.length > 0;
 }
 
-/**
- * Within one group a station matches if it matches any selected value (OR).
- * Between the status group and the connector group both must match (AND).
- */
 export function filterStations(stations: readonly Station[], filters: StationFilters): Station[] {
   return stations.filter(
     (station) =>
@@ -28,7 +24,6 @@ export function filterStations(stations: readonly Station[], filters: StationFil
   );
 }
 
-/** Distinct connector type names across all stations, sorted for stable chip order. */
 export function connectorTypeNames(stations: readonly Station[]): string[] {
   const names = new Set<string>();
   for (const station of stations) {
@@ -39,7 +34,6 @@ export function connectorTypeNames(stations: readonly Station[]): string[] {
   return [...names].sort((a, b) => a.localeCompare(b));
 }
 
-/** Adds the value if it is missing, removes it if it is present. Returns a new array. */
 export function toggleValue<T>(values: readonly T[], value: T): T[] {
   return values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
 }

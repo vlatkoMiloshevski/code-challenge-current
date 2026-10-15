@@ -39,7 +39,6 @@ import {
   parseStationId,
 } from '../features/url-state/station-url-state';
 
-/** Below this width the details open in an ion-modal instead of a side panel. */
 const DESKTOP_QUERY = '(min-width: 768px)';
 
 @Component({
@@ -70,17 +69,13 @@ export class HomePage {
 
   protected readonly isDesktop = mediaQuery(DESKTOP_QUERY);
 
-  /** null until the first successful response. */
   protected readonly stations = signal<Station[] | null>(null);
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
-  /** Set after an address is picked. The map flies there and marks it. */
   protected readonly focusPoint = signal<GeocodeResult | null>(null);
-  /** Shown under the search when the browser cannot provide the user's location. */
   protected readonly locationMessage = signal<string | null>(null);
 
-  // The URL is the source of truth for the page state. Links to a station, search or filter reproduce the same view.
   private readonly params = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
@@ -117,8 +112,6 @@ export class HomePage {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    // Dev only: ?synthetic=<count> replaces the API data with generated stations, for performance checks.
-    // In production builds this function always returns null (see synthetic-stations.prod.ts).
     const synthetic = syntheticStationsFor(this.route.snapshot.queryParamMap.get('synthetic'));
     if (synthetic) {
       this.stations.set(synthetic);
@@ -151,7 +144,6 @@ export class HomePage {
 
   protected onFiltersChange(filters: StationFilters): void {
     saveStationFilters(filters);
-    // Changing filters starts a new browsing context, so a previously opened station is closed.
     this.patchUrl({ ...filtersToParams(filters), station: null }, true);
   }
 
@@ -161,7 +153,6 @@ export class HomePage {
 
   protected onSearchChanged(text: string): void {
     this.patchUrl({ q: text || null }, true);
-    // Clearing the search also clears the chosen address, so the map returns to its earlier view.
     if (!text) {
       this.focusPoint.set(null);
     }
@@ -183,7 +174,6 @@ export class HomePage {
     this.locationMessage.set(null);
   }
 
-  /** Changes only the given parameters. A null value removes that parameter. */
   private patchUrl(patch: Params, replaceUrl: boolean): void {
     void this.router.navigate([], {
       relativeTo: this.route,

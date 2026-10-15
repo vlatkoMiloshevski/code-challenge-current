@@ -41,7 +41,6 @@ app-station-map {
   color: var(--ion-color-danger);
 }
 
-// On desktop the details panel sits on the right, so the filters must not cover its close button.
 .filter-overlay.shift-for-panel {
   right: 396px;
 }

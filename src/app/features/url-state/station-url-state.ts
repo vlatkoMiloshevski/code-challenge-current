@@ -4,13 +4,6 @@ import { MARKER_CONNECTORS, MARKER_STATUSES, StationFilters } from '../filters/s
 import { MarkerStatus } from '../map/station-geojson';
 import { MarkerConnector } from '../../core/models/station.model';
 
-// URL parameters that describe the page state, so a link opens the same view:
-//   station    id of the open station
-//   q          address search text
-//   status     comma separated marker statuses (available,full,closed)
-//   connectors comma separated connector type names (CCS2, Type - 2, CHAdeMO)
-//   view       "favorites" when only favorite stations are shown
-
 export const FAVORITES_VIEW = 'favorites';
 
 function splitList(raw: string | null): string[] {

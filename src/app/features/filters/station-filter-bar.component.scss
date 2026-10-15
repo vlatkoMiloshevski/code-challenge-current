@@ -1,12 +1,8 @@
-// Softer text for the whole filter bar. Ionic's medium color is gray in both light and dark themes,
-// so the text is not pure black on light backgrounds or pure white on dark ones.
 :host {
   display: block;
   color: var(--ion-color-medium);
 }
 
-// Section header: "Filters", a count of active filters, and an arrow that expands or collapses the groups.
-// A thin divider separates the favorites row from the filter section.
 .filters-header {
   margin-top: 8px;
   padding: 8px 8px 8px;
@@ -40,7 +36,6 @@
   font-size: 18px;
 }
 
-// Status and connector filters sit side by side, status on the left.
 .filter-groups {
   display: flex;
   flex-wrap: wrap;
@@ -67,7 +62,6 @@
   padding: 4px 12px 8px;
 }
 
-// Compact "Clear filters" button. Ionic sets the text size inside its native part, so the part is styled too.
 .clear-filters ion-button {
   --padding-top: 0;
   --padding-bottom: 0;
@@ -81,14 +75,11 @@
   font-size: 11px;
 }
 
-// Square checkboxes with sharp corners.
 ion-checkbox {
   font-size: 14px;
   --border-radius: 0;
 }
 
-// Favorites row above the filters: a label with a show/hide switch on the right.
-// A thin divider above the favorites row separates it from the search bar.
 .favorites-row {
   display: flex;
   align-items: center;
@@ -103,8 +94,6 @@ ion-checkbox {
   font-size: 15px;
 }
 
-// Explicit toggle size: the default switch is larger than the text line it sits on.
-// The track (outer pill) and the handle (inner knob) are both sized through Ionic's CSS parts.
 ion-toggle {
   --handle-width: 12px;
   --handle-height: 12px;
@@ -112,7 +101,6 @@ ion-toggle {
   --handle-spacing: 2px;
   width: 40px;
   height: 20px;
-  // When checked, Ionic moves an inner wrapper past the switch edge. Clipping keeps that movement from widening the overlay.
   overflow: hidden;
 }
 
@@ -122,19 +110,16 @@ ion-toggle::part(track) {
   border-radius: 13px;
 }
 
-// Smaller, flatter chips: less corner rounding and less vertical padding.
 ion-chip {
   flex: 0 0 auto;
   margin: 0;
   height: 24px;
-  // Ionic sets min-height: 32px on chips, which overrides height unless it is changed too.
   min-height: 24px;
   padding-top: 0;
   padding-bottom: 0;
   border-radius: 6px;
 }
 
-// Pressed and hovered chips get darker, so the active state is visible while the button is held.
 ion-chip:hover,
 ion-chip:active {
   filter: brightness(0.8);

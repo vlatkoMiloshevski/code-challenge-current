@@ -17,15 +17,12 @@ export class AddressSearchComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private request: Subscription | null = null;
 
-  /** Search text from the URL. A valid value is searched again when the page loads. */
   readonly initialQuery = input('');
   readonly resultSelected = output<GeocodeResult>();
-  /** Emits the submitted text, or an empty string when the search is cleared. */
   readonly searchChanged = output<string>();
 
   protected readonly query = signal('');
   protected readonly searching = signal(false);
-  /** null means no search has been run yet. An empty array means the search found nothing. */
   protected readonly results = signal<GeocodeResult[] | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
 
@@ -41,7 +38,6 @@ export class AddressSearchComponent implements OnInit {
     this.query.set(value ?? '');
   }
 
-  /** Search runs only on Enter. Nominatim does not allow autocomplete. */
   protected submit(): void {
     const text = this.query().trim();
     if (text.length < GEOCODING.minQueryLength) {
@@ -70,7 +66,6 @@ export class AddressSearchComponent implements OnInit {
   }
 
   private run(text: string): void {
-    // A new search replaces the one still in flight.
     this.request?.unsubscribe();
     this.searching.set(true);
     this.errorMessage.set(null);

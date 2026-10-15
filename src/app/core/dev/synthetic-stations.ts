@@ -1,9 +1,5 @@
 import { ConnectorType, Station, StationConnector, StationType } from '../models/station.model';
 
-// Development helper: generates many stations so map and list performance can be measured
-// beyond the 44 stations of the real dataset. It is only used when the app runs in dev mode
-// with ?synthetic=<count> in the URL (see HomePage).
-
 const CONNECTOR_TYPES: readonly ConnectorType[] = [
   { id: 4, name: 'Type - 2', iconName: 'type-2', category: 25 },
   { id: 6, name: 'CHAdeMO', iconName: 'chademo', category: 40 },
@@ -12,10 +8,8 @@ const CONNECTOR_TYPES: readonly ConnectorType[] = [
 
 const STATION_TYPES: readonly StationType[] = ['AppartmentBuilding', 'PrivateParking', 'HomeCharger', 'Public'];
 
-// Bounding box around Oslo, where the real dataset is located.
 const BOUNDS = { minLat: 59.85, maxLat: 59.98, minLng: 10.6, maxLng: 10.95 };
 
-/** Small seeded generator, so the same count always gives the same stations. */
 function createRandom(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -27,7 +21,6 @@ function createRandom(seed: number): () => number {
   };
 }
 
-/** Stations for ?synthetic=<count>, or null when the parameter is missing or not a valid count. */
 export function syntheticStationsFor(param: string | null): Station[] | null {
   const count = Number(param);
   return Number.isInteger(count) && count > 0 && count <= 50_000 ? generateSyntheticStations(count) : null;

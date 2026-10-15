@@ -21,7 +21,6 @@ export class StationFilterBarComponent {
   readonly filters = input.required<StationFilters>();
   readonly filtersChange = output<StationFilters>();
 
-  /** Favorites chip below the filters. Counts are shown when there are starred items. */
   readonly favoritesView = input(false);
   readonly favoritesToggled = output<void>();
 
@@ -29,7 +28,6 @@ export class StationFilterBarComponent {
   protected readonly statusLabels = STATUS_LABELS;
   protected readonly connectorOptions = MARKER_CONNECTORS;
 
-  /** The filter groups can be collapsed to save room over the map. */
   protected readonly expanded = signal(false);
   protected readonly chevronIcon = computed(() =>
     this.expanded() ? '/assets/icons/chevron-up.svg' : '/assets/icons/chevron-down.svg',
@@ -44,7 +42,6 @@ export class StationFilterBarComponent {
     return this.filters().connectors.includes(connector);
   }
 
-  // Emits only when the switch differs from the current view, so a programmatic update does not toggle back.
   protected onFavoritesSwitch(checked: boolean): void {
     if (checked !== this.favoritesView()) {
       this.favoritesToggled.emit();
@@ -55,8 +52,6 @@ export class StationFilterBarComponent {
     this.expanded.update((value) => !value);
   }
 
-  // The checkbox events give the new checked state. Setting the same state again emits nothing,
-  // so programmatic updates of [checked] do not loop back into a filter change.
   protected setStatus(status: MarkerStatus, checked: boolean): void {
     const current = this.filters().statuses;
     if (checked === current.includes(status)) {

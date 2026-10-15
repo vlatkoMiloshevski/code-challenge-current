@@ -10,7 +10,6 @@ export interface GeocodeResult {
   longitude: number;
 }
 
-/** One item of the Nominatim search response. Coordinates arrive as strings. */
 interface NominatimResultDto {
   lat: string;
   lon: string;
@@ -33,7 +32,6 @@ export class GeocodingError extends Error {
 export class GeocodingService {
   private readonly http = inject(HttpClient);
 
-  /** Resolves a free-text address. An empty array means nothing was found, which is not an error. */
   search(query: string): Observable<GeocodeResult[]> {
     const params = new HttpParams()
       .set('q', query)
@@ -45,7 +43,6 @@ export class GeocodingService {
         if (!Array.isArray(rows)) {
           throw new GeocodingError('invalid', 'Unexpected response from the address search.');
         }
-        // Rows with coordinates that are not numbers cannot be shown on the map, so they are dropped.
         return rows.flatMap((row) => {
           const latitude = Number(row.lat);
           const longitude = Number(row.lon);
