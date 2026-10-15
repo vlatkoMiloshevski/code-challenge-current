@@ -44,6 +44,11 @@
   padding: 4px 16px 16px;
 }
 
+// The groups stay in the DOM and are only hidden, so the arrow does not re-create them.
+.filter-groups[hidden] {
+  display: none;
+}
+
 .filter-group {
   display: flex;
   flex-direction: column;

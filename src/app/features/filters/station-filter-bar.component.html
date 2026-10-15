@@ -24,8 +24,7 @@
   </button>
 </div>
 
-@if (expanded()) {
-  <div id="station-filter-groups" class="filter-groups">
+  <div id="station-filter-groups" class="filter-groups" [hidden]="!expanded()">
     <div class="filter-group" role="group" aria-label="Status">
       <p class="group-caption">By status</p>
       @for (status of statusOptions; track status) {
@@ -52,11 +51,9 @@
       }
     </div>
 
+    @if (anyActive()) {
+      <div class="clear-filters">
+        <ion-button fill="outline" size="small" (click)="clear()">Clear filters</ion-button>
+      </div>
+    }
   </div>
-
-  @if (anyActive()) {
-    <div class="clear-filters">
-      <ion-button fill="outline" size="small" (click)="clear()">Clear filters</ion-button>
-    </div>
-  }
-}
