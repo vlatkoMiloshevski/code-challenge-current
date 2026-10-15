@@ -22,29 +22,28 @@
   </header>
 
   <div class="summary">
-    <span
-      class="station-dot"
-      aria-hidden="true"
-      [class.marker-available]="markerStatusOf(station()) === 'available'"
-      [class.marker-full]="markerStatusOf(station()) === 'full'"
-      [class.marker-closed]="markerStatusOf(station()) === 'closed'"
-    ></span>
-    <ion-badge>{{ summaryLabel(station()) }}</ion-badge>
-    <span>{{ station().boxes.available }} of {{ station().boxes.total }} available</span>
+    <ion-badge>
+      <span
+        class="station-dot"
+        aria-hidden="true"
+        [class.marker-available]="markerStatusOf(station()) === 'available'"
+        [class.marker-full]="markerStatusOf(station()) === 'full'"
+        [class.marker-closed]="markerStatusOf(station()) === 'closed'"
+      ></span>
+      {{ summaryLabel(station()) }}
+    </ion-badge>
     <span>{{ station().power.minKwh }}–{{ station().power.maxKwh }} kWh</span>
   </div>
 
-  <ion-list lines="inset">
-    <ion-list-header><ion-label>Connectors</ion-label></ion-list-header>
-    @for (connector of station().connectors; track connector.type.id) {
-      <ion-item>
-        <ion-label>{{ connector.type.name }}</ion-label>
-        <ion-note slot="end">{{ connector.available }} / {{ connector.amount }} free</ion-note>
-      </ion-item>
-    } @empty {
-      <ion-item><ion-label>No connector information.</ion-label></ion-item>
-    }
-  </ion-list>
+  <ion-item class="point-item">
+    <ion-label>Connectors: 
+      @for (connector of station().connectors; track connector.type.id) {
+        {{ connector.type.name }}
+      } @empty {
+        No connector information.
+      }
+    </ion-label>
+  </ion-item>
 
   @if (loading()) {
     <div class="state-block">
@@ -58,7 +57,8 @@
     </div>
   } @else if (detail(); as d) {
     <ion-list lines="inset">
-      <ion-list-header><ion-label>Charge points</ion-label></ion-list-header>
+      <ion-list-header>
+        <ion-label>Charge points: {{ station().boxes.available }} of {{ station().boxes.total }} available</ion-label></ion-list-header>
       @for (point of d.chargePoints; track point.id) {
         <ion-item class="point-item">
           <ion-label>
