@@ -17,8 +17,8 @@
     (click)="toggleExpanded()"
   >
     <span>Filters</span>
-    @if (activeCount() > 0) {
-      <span class="active-count" aria-label="active filters">{{ activeCount() }}</span>
+    @if (anyActive()) {
+      <span aria-label="active filters">applied</span>
     }
     <ion-icon [src]="chevronIcon()" aria-hidden="true"></ion-icon>
   </button>
@@ -52,10 +52,11 @@
       }
     </div>
 
-    @if (anyActive()) {
-      <div>
-        <ion-button fill="clear" size="small" (click)="clear()">Clear filters</ion-button>
-      </div>
-    }
   </div>
+
+  @if (anyActive()) {
+    <div class="clear-filters">
+      <ion-button fill="outline" size="small" (click)="clear()">Clear filters</ion-button>
+    </div>
+  }
 }

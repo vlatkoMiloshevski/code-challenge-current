@@ -36,9 +36,6 @@ export class StationFilterBarComponent {
     this.expanded() ? '/assets/icons/chevron-up.svg' : '/assets/icons/chevron-down.svg',
   );
   protected readonly anyActive = computed(() => hasActiveFilters(this.filters()));
-  protected readonly activeCount = computed(
-    () => this.filters().statuses.length + this.filters().connectorTypes.length,
-  );
 
   protected readonly favoritesLabel = computed(() => {
     const stations = this.favoriteStationCount();

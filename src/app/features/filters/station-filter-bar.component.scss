@@ -40,20 +40,6 @@
   font-size: 18px;
 }
 
-// Number of active filters, shown next to the title while the section is collapsed.
-.active-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 10px;
-  background: var(--ion-color-primary);
-  color: #fff;
-  font-size: 12px;
-}
-
 // Status and connector filters sit side by side, status on the left.
 .filter-groups {
   display: flex;
@@ -73,6 +59,26 @@
   margin: 0 0 2px;
   color: var(--ion-color-medium);
   font-size: 12px;
+}
+
+.clear-filters {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 12px 8px;
+}
+
+// Compact "Clear filters" button. Ionic sets the text size inside its native part, so the part is styled too.
+.clear-filters ion-button {
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  height: 24px;
+  min-height: 24px;
+}
+
+.clear-filters ion-button::part(native) {
+  font-size: 11px;
 }
 
 // Square checkboxes with sharp corners.
