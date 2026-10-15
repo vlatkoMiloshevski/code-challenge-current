@@ -22,6 +22,7 @@ const CLUSTER_COUNT_LAYER = 'cluster-count';
 const POINT_LAYER = 'station-points';
 const INITIAL_CENTER: [number, number] = [10.75, 59.92];
 const FOCUS_ZOOM = 15;
+const VIEW_TRANSITION_MS = 800;
 
 export interface MapPoint {
   latitude: number;
@@ -85,7 +86,7 @@ export class StationMapComponent implements OnDestroy {
         }
         this.lastViewKey = key;
         if (!isFirstRun && this.map && this.mapLoaded) {
-          this.fitToStations(this.map);
+          this.fitToStations(this.map, VIEW_TRANSITION_MS);
         }
       });
     });
@@ -200,7 +201,7 @@ export class StationMapComponent implements OnDestroy {
     }
   }
 
-  private fitToStations(map: maplibregl.Map): void {
+  private fitToStations(map: maplibregl.Map, duration = 0): void {
     const bounds = stationsBounds(this.stations());
     if (!bounds) {
       return;
@@ -208,7 +209,8 @@ export class StationMapComponent implements OnDestroy {
     map.fitBounds(bounds, {
       padding: { top: 160, bottom: 60, left: 40, right: 40 },
       maxZoom: 13,
-      duration: 0,
+      duration,
+      essential: duration > 0,
     });
     this.hasFitted = true;
   }
