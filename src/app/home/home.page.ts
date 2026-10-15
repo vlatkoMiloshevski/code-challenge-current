@@ -16,7 +16,7 @@ import { StationApiService } from '../core/services/station-api.service';
 import { Station } from '../core/models/station.model';
 import { GeocodeResult } from '../core/services/geocoding.service';
 import { syntheticStationsFor } from '../core/dev/synthetic-stations';
-import { mediaQuery } from '../core/ui/media-query';
+import { mediaQuery } from '../core/utils/media-query';
 import { StationMapComponent } from '../features/map/station-map.component';
 import { StationDetailsComponent } from '../features/station-details/station-details.component';
 import { StationFilterBarComponent } from '../features/filters/station-filter-bar.component';
