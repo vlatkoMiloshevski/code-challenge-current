@@ -93,7 +93,7 @@ export function mapChargePoint(dto: ChargePointDto): ChargePoint {
     status: mapChargePointStatus(dto.CurrentStatus),
     maxKw: dto.MaxKW,
     volts: dto.Volts,
-    connectorTypes: dto.ConnectorTypes.map(mapConnectorType),
+    connectors: dto.ConnectorTypes.map(mapConnectorType),
   };
 }
 

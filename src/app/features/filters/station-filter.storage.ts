@@ -1,4 +1,4 @@
-import { MARKER_STATUSES, NO_FILTERS, StationFilters } from './station-filters';
+import { MARKER_CONNECTORS, MARKER_STATUSES, NO_FILTERS, StationFilters } from './station-filters';
 
 const STORAGE_KEY = 'station-filters';
 
@@ -15,13 +15,13 @@ export function parseStationFilters(raw: string | null): StationFilters {
     if (typeof value !== 'object' || value === null) {
       return NO_FILTERS;
     }
-    const { statuses, connectorTypes } = value as Record<string, unknown>;
+    const { statuses, connectors } = value as Record<string, unknown>;
     return {
       statuses: Array.isArray(statuses)
         ? MARKER_STATUSES.filter((status) => statuses.includes(status))
         : [],
-      connectorTypes: Array.isArray(connectorTypes)
-        ? [...new Set(connectorTypes.filter((type): type is string => typeof type === 'string'))]
+      connectors: Array.isArray(connectors)
+        ? MARKER_CONNECTORS.filter((connector) => connectors.includes(connector))
         : [],
     };
   } catch {

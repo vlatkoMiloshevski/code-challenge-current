@@ -1,19 +1,18 @@
-import { Station } from '../../core/models/station.model';
+import { MarkerConnector, Station } from '../../core/models/station.model';
 import { MarkerStatus, markerStatus } from '../map/station-geojson';
 
 export const MARKER_STATUSES: readonly MarkerStatus[] = ['available', 'full', 'closed'];
+export const MARKER_CONNECTORS: readonly MarkerConnector[] = ['CCS2', 'Type - 2', 'CHAdeMO'];
 
 export interface StationFilters {
-  /** Empty means no status restriction. */
   statuses: MarkerStatus[];
-  /** Connector type names such as "CCS2". Empty means no restriction. */
-  connectorTypes: string[];
+  connectors: MarkerConnector[];
 }
 
-export const NO_FILTERS: StationFilters = { statuses: [], connectorTypes: [] };
+export const NO_FILTERS: StationFilters = { statuses: [], connectors: [] };
 
 export function hasActiveFilters(filters: StationFilters): boolean {
-  return filters.statuses.length > 0 || filters.connectorTypes.length > 0;
+  return filters.statuses.length > 0 || filters.connectors.length > 0;
 }
 
 /**
@@ -24,8 +23,8 @@ export function filterStations(stations: readonly Station[], filters: StationFil
   return stations.filter(
     (station) =>
       (filters.statuses.length === 0 || filters.statuses.includes(markerStatus(station))) &&
-      (filters.connectorTypes.length === 0 ||
-        station.connectors.some((connector) => filters.connectorTypes.includes(connector.type.name))),
+      (filters.connectors.length === 0 ||
+        station.connectors.some((connector) => filters.connectors.includes(connector.type.name as MarkerConnector))),
   );
 }
 

@@ -1,8 +1,9 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { IonButton, IonCheckbox, IonIcon, IonToggle } from '@ionic/angular';
 
-import { MARKER_STATUSES, StationFilters, hasActiveFilters } from './station-filters';
+import { MARKER_CONNECTORS, MARKER_STATUSES, StationFilters, hasActiveFilters } from './station-filters';
 import { MarkerStatus } from '../map/station-geojson';
+import { MarkerConnector } from '../../core/models/station.model';
 
 const STATUS_LABELS: Record<MarkerStatus, string> = {
   available: 'Available',
@@ -18,17 +19,15 @@ const STATUS_LABELS: Record<MarkerStatus, string> = {
 })
 export class StationFilterBarComponent {
   readonly filters = input.required<StationFilters>();
-  readonly connectorTypes = input.required<readonly string[]>();
   readonly filtersChange = output<StationFilters>();
 
   /** Favorites chip below the filters. Counts are shown when there are starred items. */
   readonly favoritesView = input(false);
-  readonly favoriteStationCount = input(0);
-  readonly favoriteConnectorCount = input(0);
   readonly favoritesToggled = output<void>();
 
   protected readonly statusOptions = MARKER_STATUSES;
   protected readonly statusLabels = STATUS_LABELS;
+  protected readonly connectorOptions = MARKER_CONNECTORS;
 
   /** The filter groups can be collapsed to save room over the map. */
   protected readonly expanded = signal(false);
@@ -37,20 +36,12 @@ export class StationFilterBarComponent {
   );
   protected readonly anyActive = computed(() => hasActiveFilters(this.filters()));
 
-  protected readonly favoritesLabel = computed(() => {
-    const stations = this.favoriteStationCount();
-    const connectors = this.favoriteConnectorCount();
-    return stations + connectors > 0
-      ? `Favorites (stations: ${stations}, connectors: ${connectors})`
-      : 'Favorites';
-  });
-
   protected isStatusSelected(status: MarkerStatus): boolean {
     return this.filters().statuses.includes(status);
   }
 
-  protected isConnectorSelected(type: string): boolean {
-    return this.filters().connectorTypes.includes(type);
+  protected isConnectorSelected(connector: MarkerConnector): boolean {
+    return this.filters().connectors.includes(connector);
   }
 
   // Emits only when the switch differs from the current view, so a programmatic update does not toggle back.
@@ -77,18 +68,18 @@ export class StationFilterBarComponent {
     });
   }
 
-  protected setConnector(type: string, checked: boolean): void {
-    const current = this.filters().connectorTypes;
-    if (checked === current.includes(type)) {
+  protected setConnector(connector: MarkerConnector, checked: boolean): void {
+    const current = this.filters().connectors;
+    if (checked === current.includes(connector)) {
       return;
     }
     this.filtersChange.emit({
       ...this.filters(),
-      connectorTypes: checked ? [...current, type] : current.filter((value) => value !== type),
+      connectors: checked ? [...current, connector] : current.filter((value) => value !== connector),
     });
   }
 
   protected clear(): void {
-    this.filtersChange.emit({ statuses: [], connectorTypes: [] });
+    this.filtersChange.emit({ statuses: [], connectors: [] });
   }
 }

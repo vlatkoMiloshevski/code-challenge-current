@@ -112,6 +112,8 @@ ion-toggle {
   --handle-spacing: 2px;
   width: 40px;
   height: 20px;
+  // When checked, Ionic moves an inner wrapper past the switch edge. Clipping keeps that movement from widening the overlay.
+  overflow: hidden;
 }
 
 ion-toggle::part(track) {

@@ -1,5 +1,5 @@
 <div class="favorites-row">
-  <span class="favorites-label" id="favorites-label">{{ favoritesLabel() }}</span>
+  <span class="favorites-label" id="favorites-label">Favorites</span>
   <ion-toggle
     size="small"
     aria-labelledby="favorites-label"
@@ -41,13 +41,13 @@
 
     <div class="filter-group" role="group" aria-label="Connector types">
       <p class="group-caption">By connector</p>
-      @for (type of connectorTypes(); track type) {
+      @for (connector of connectorOptions; track connector) {
         <ion-checkbox
           labelPlacement="end"
-          [checked]="isConnectorSelected(type)"
-          (ionChange)="setConnector(type, $event.detail.checked)"
+          [checked]="isConnectorSelected(connector)"
+          (ionChange)="setConnector(connector, $event.detail.checked)"
         >
-          {{ type }}
+          {{ connector }}
         </ion-checkbox>
       }
     </div>

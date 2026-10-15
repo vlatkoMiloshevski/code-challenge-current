@@ -1,9 +1,8 @@
 // Domain models used by the UI. These are independent of the API field names.
 
-export type StationType = 'AppartmentBuilding' | 'PrivateParking' | 'HomeCharger' | 'Public'; // | 'Other';
-
-/** Normalized charge point status. Unknown API values map to 'Unknown'. */
-export type ChargePointStatus = 'Available' | 'Preparing'; // | 'Occupied' | 'Offline' | 'Unknown';
+export type StationType = 'AppartmentBuilding' | 'PrivateParking' | 'HomeCharger' | 'Public';
+export type ChargePointStatus = 'Available' | 'Preparing';
+export type MarkerConnector = 'CCS2' | 'Type - 2' | 'CHAdeMO';
 
 export interface ConnectorType {
   id: number;
@@ -52,7 +51,7 @@ export interface ChargePoint {
   status: ChargePointStatus;
   maxKw: number;
   volts: number;
-  connectorTypes: ConnectorType[];
+  connectors: ConnectorType[];
 }
 
 export interface Pricing {

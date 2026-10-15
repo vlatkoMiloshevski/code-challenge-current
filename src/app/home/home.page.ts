@@ -94,8 +94,7 @@ export class HomePage {
   });
 
   protected readonly hasFavorites = computed(() => this.favorites.stationsInFavoritesView().size > 0);
-  protected readonly connectorTypes = computed(() => connectorTypeNames(this.stations() ?? []));
-  /** Filters always apply. In the favorites view only favorite stations are kept, and they must also match the filters. */
+  protected readonly connectors = computed(() => connectorTypeNames(this.stations() ?? []));
   protected readonly visibleStations = computed(() => {
     const matching = filterStations(this.stations() ?? [], this.filters());
     if (!this.favoritesView()) {
@@ -108,7 +107,6 @@ export class HomePage {
   constructor() {
     this.load();
 
-    // The first visit with stored filters writes them into the URL, so the address bar shows them.
     const stored = loadStationFilters();
     if (!hasFilterParams(this.route.snapshot.queryParamMap) && hasActiveFilters(stored)) {
       this.patchUrl(filtersToParams(stored), true);
@@ -143,7 +141,6 @@ export class HomePage {
       });
   }
 
-  /** Pushes a history entry, so the back button closes the station. */
   protected onStationSelected(station: Station): void {
     this.patchUrl({ station: String(station.id) }, false);
   }

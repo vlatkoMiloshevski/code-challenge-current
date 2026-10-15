@@ -1,13 +1,14 @@
 import { ParamMap, Params } from '@angular/router';
 
-import { MARKER_STATUSES, StationFilters } from '../filters/station-filters';
+import { MARKER_CONNECTORS, MARKER_STATUSES, StationFilters } from '../filters/station-filters';
 import { MarkerStatus } from '../map/station-geojson';
+import { MarkerConnector } from '../../core/models/station.model';
 
 // URL parameters that describe the page state, so a link opens the same view:
 //   station    id of the open station
 //   q          address search text
 //   status     comma separated marker statuses (available,full,closed)
-//   connectors comma separated connector type names
+//   connectors comma separated connector type names (CCS2, Type - 2, CHAdeMO)
 //   view       "favorites" when only favorite stations are shown
 
 export const FAVORITES_VIEW = 'favorites';
@@ -22,14 +23,16 @@ export function parseStationId(params: ParamMap): number | null {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-/** Unknown statuses are ignored, so an edited link cannot break the filters. */
 export function parseFilters(params: ParamMap): StationFilters {
   const statuses = splitList(params.get('status')).filter((value): value is MarkerStatus =>
     (MARKER_STATUSES as readonly string[]).includes(value),
   );
+  const connectors = splitList(params.get('connectors')).filter((value): value is MarkerConnector =>
+    (MARKER_CONNECTORS as readonly string[]).includes(value),
+  );
   return {
     statuses: [...new Set(statuses)],
-    connectorTypes: [...new Set(splitList(params.get('connectors')))],
+    connectors: [...new Set(connectors)],
   };
 }
 
@@ -37,11 +40,10 @@ export function hasFilterParams(params: ParamMap): boolean {
   return params.has('status') || params.has('connectors');
 }
 
-/** Empty filters become null, which removes the parameter from the URL. */
 export function filtersToParams(filters: StationFilters): Params {
   return {
     status: filters.statuses.join(',') || null,
-    connectors: filters.connectorTypes.join(',') || null,
+    connectors: filters.connectors.join(',') || null,
   };
 }
 

@@ -88,7 +88,7 @@
             <p class="spec"><span class="spec-label">Power:</span> {{ point.maxKw | number: '1.0-1' }} kW</p>
             <p class="spec"><span class="spec-label">Voltage:</span> {{ point.volts }} V</p>
             <p class="spec"><span class="spec-label">Charger code:</span> {{ point.chargerCode }}</p>
-            <p class="spec"><span class="spec-label">Connector:</span> {{ point.connectorTypes.map(c => c.name).join(', ') || 'None' }}</p>
+            <p class="spec"><span class="spec-label">Connector:</span> {{ point.connectors.map(c => c.name).join(', ') || 'None' }}</p>
           </ion-label>
         </ion-item>
       } @empty {

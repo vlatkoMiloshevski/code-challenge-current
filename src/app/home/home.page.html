@@ -45,10 +45,7 @@
 
         <app-station-filter-bar
           [filters]="filters()"
-          [connectorTypes]="connectorTypes()"
           [favoritesView]="favoritesView()"
-          [favoriteStationCount]="favorites.stationCount()"
-          [favoriteConnectorCount]="favorites.connectorCount()"
           (filtersChange)="onFiltersChange($event)"
           (favoritesToggled)="toggleFavoritesView()"
         ></app-station-filter-bar>
