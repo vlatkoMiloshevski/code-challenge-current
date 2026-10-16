@@ -5,13 +5,7 @@ import {
   StationDetailDto,
   StationDto,
 } from '../api/station-api.dto';
-import {
-  ChargePoint,
-  ConnectorType,
-  Station,
-  StationConnector,
-  StationDetail,
-} from '../models/station.model';
+import { ChargePoint, ConnectorType, Station, StationConnector, StationDetail } from '../models/station.model';
 
 export function mapConnectorType(dto: ConnectorTypeDto): ConnectorType {
   return {

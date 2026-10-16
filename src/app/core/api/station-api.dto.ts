@@ -1,4 +1,3 @@
-
 export interface ConnectorTypeDto {
   PK_CPConnectorTypeID: number;
   Name: string;

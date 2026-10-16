@@ -1,16 +1,7 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import {
-  IonButton,
-  IonContent,
-  IonHeader,
-  IonModal,
-  IonSpinner,
-  IonText,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/angular';
+import { IonButton, IonContent, IonHeader, IonModal, IonSpinner, IonText, IonTitle, IonToolbar } from '@ionic/angular';
 
 import { StationApiService } from '../core/services/station-api.service';
 import { Station } from '../core/models/station.model';

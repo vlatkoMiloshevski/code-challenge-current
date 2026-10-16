@@ -23,9 +23,7 @@ import { MarkerStatus, markerStatus } from '../map/station-geojson';
 const SUMMARY_LABELS = { available: 'Open', full: 'Full', closed: 'Closed' } as const;
 
 type DetailState =
-  | { status: 'loading' }
-  | { status: 'error'; message: string }
-  | { status: 'ready'; detail: StationDetail };
+  { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; detail: StationDetail };
 
 @Component({
   selector: 'app-station-details',

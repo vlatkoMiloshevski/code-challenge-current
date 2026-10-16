@@ -22,8 +22,7 @@ export function loadFavorites(): StoredFavorites {
 export function saveFavorites(favorites: StoredFavorites): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
-  } catch {
-  }
+  } catch {}
 }
 
 function isId(value: unknown): value is number {

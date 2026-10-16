@@ -26,9 +26,7 @@ export class FavoritesService {
   }
 
   isChargePointFavorite(stationId: number, chargePointId: number): boolean {
-    return this.chargePoints().some(
-      (point) => point.stationId === stationId && point.chargePointId === chargePointId,
-    );
+    return this.chargePoints().some((point) => point.stationId === stationId && point.chargePointId === chargePointId);
   }
 
   toggleStation(stationId: number): void {

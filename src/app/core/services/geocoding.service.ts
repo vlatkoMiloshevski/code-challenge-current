@@ -28,10 +28,7 @@ export class GeocodingService {
   private readonly http = inject(HttpClient);
 
   search(query: string): Observable<GeocodeResult[]> {
-    const params = new HttpParams()
-      .set('q', query)
-      .set('format', 'jsonv2')
-      .set('limit', String(GEOCODING.resultLimit));
+    const params = new HttpParams().set('q', query).set('format', 'jsonv2').set('limit', String(GEOCODING.resultLimit));
 
     return this.http.get<NominatimResultDto[]>(GEOCODING.searchUrl, { params }).pipe(
       map((rows) => {

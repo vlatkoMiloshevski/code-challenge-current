@@ -1,4 +1,3 @@
-
 export type MarkerConnector = 'CCS2' | 'Type - 2' | 'CHAdeMO';
 
 export interface ConnectorType {

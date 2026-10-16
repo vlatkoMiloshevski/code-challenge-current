@@ -7,7 +7,12 @@ import { MarkerConnector } from '../../core/models/station.model';
 export const FAVORITES_VIEW = 'favorites';
 
 function splitList(raw: string | null): string[] {
-  return raw ? raw.split(',').map((part) => part.trim()).filter(Boolean) : [];
+  return raw
+    ? raw
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean)
+    : [];
 }
 
 export function parseStationId(params: ParamMap): number | null {

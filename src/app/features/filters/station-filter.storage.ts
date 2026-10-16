@@ -13,8 +13,7 @@ export function loadStationFilters(): StationFilters {
 export function saveStationFilters(filters: StationFilters): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
-  } catch {
-  }
+  } catch {}
 }
 
 function parseStationFilters(raw: string | null): StationFilters {
@@ -28,9 +27,7 @@ function parseStationFilters(raw: string | null): StationFilters {
     }
     const { statuses, connectors } = value as Record<string, unknown>;
     return {
-      statuses: Array.isArray(statuses)
-        ? MARKER_STATUSES.filter((status) => statuses.includes(status))
-        : [],
+      statuses: Array.isArray(statuses) ? MARKER_STATUSES.filter((status) => statuses.includes(status)) : [],
       connectors: Array.isArray(connectors)
         ? MARKER_CONNECTORS.filter((connector) => connectors.includes(connector))
         : [],
