@@ -117,15 +117,21 @@ These numbers come from a software-rendered headless browser, so on a real devic
 
 ## Testing
 
-Unit tests are planned but not yet written. The existing `home.page.spec.ts` is still the default template and does not compile against the current page. The test framework is still to be decided (the project includes Vitest; the challenge mentions Jasmine and Karma).
+Unit tests use Jest with `jest-preset-angular` (`npm test`). The challenge suggests Jasmine and Karma, but Jest was chosen for faster runs without a browser. Tests live next to the code as `*.spec.ts`.
 
-Priority areas for tests:
+```bash
+npm test
+```
 
-- station detail fetching, merging and error states,
-- filter logic and filter storage,
-- address search request handling,
-- favorites toggling and storage,
-- URL state parsing and serialization.
+Covered areas:
+
+- **Station details:** fetching, merging with the list data, and the loading, error and retry states (`station-api.service.spec.ts`, `station-details.component.spec.ts`).
+- **Filtering:** status and connector logic, and saving and restoring filters in `localStorage` (`station-filters.spec.ts`, `station-filter.storage.spec.ts`).
+- **Searching:** the geocoding request and response handling, and the debounce, Enter, clear and error behavior of the search box (`geocoding.service.spec.ts`, `address-search.component.spec.ts`).
+- **Favorites:** toggling, persistence and handling of invalid stored data (`favorites.service.spec.ts`).
+- **URL state:** parsing and writing the URL parameters (`station-url-state.spec.ts`).
+
+The Ionic package is replaced by a stub in tests (`src/testing/ionic-angular.stub.ts`), because Jest cannot load it. Component tests therefore check logic, not Ionic rendering. Map rendering (`maplibre-gl`) is not covered yet.
 
 ## Build
 
