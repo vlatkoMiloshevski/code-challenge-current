@@ -23,7 +23,7 @@ Then open `http://localhost:4200/`. The app redirects to `/home`.
 | Command | Purpose |
 | --- | --- |
 | `npm start` | Start the development server |
-| `npm run build` | Production build into `www/` |
+| `npm run build` | Production build into `dist/` |
 | `npm run watch` | Development build that rebuilds on change |
 | `npm run lint` | Run ESLint |
 | `npm test` | Run unit tests (see [Testing](#testing)) |
@@ -96,7 +96,7 @@ http://localhost:4200/home?synthetic=10000
 
 The generated stations are deterministic, placed around Oslo, and limited to 50 000.
 
-The helper is excluded from production builds at compile time. `angular.json` replaces `src/app/core/dev/synthetic-stations.ts` with `synthetic-stations.prod.ts` in the production configuration. The replacement returns `null` and does not import the generator, so the generator code is not in `www/`. The development build includes it.
+The helper is excluded from production builds at compile time. `angular.json` replaces `src/app/core/dev/synthetic-stations.ts` with `synthetic-stations.prod.ts` in the production configuration. The replacement returns `null` and does not import the generator, so the generator code is not in `dist/`. The development build includes it.
 
 ### Measured performance (headless Chrome, software rendering)
 
@@ -133,4 +133,4 @@ Priority areas for tests:
 npm run build
 ```
 
-The output is written to `www/`. The MapLibre web worker is copied to `assets/maplibre/` and the star and close icons to `assets/icons/` (see `angular.json`).
+The output is written to `dist/`. The MapLibre web worker is copied to `assets/maplibre/` and the star and close icons to `assets/icons/` (see `angular.json`).
