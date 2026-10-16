@@ -1,4 +1,4 @@
-import { ConnectorType, Station, StationConnector, StationType } from '../models/station.model';
+import { ConnectorType, Station, StationConnector } from '../models/station.model';
 
 const CONNECTOR_TYPES: readonly ConnectorType[] = [
   { id: 4, name: 'Type - 2', iconName: 'type-2', category: 25 },
@@ -6,7 +6,7 @@ const CONNECTOR_TYPES: readonly ConnectorType[] = [
   { id: 9, name: 'CCS2', iconName: 'ccs2', category: 33 },
 ];
 
-const STATION_TYPES: readonly StationType[] = ['AppartmentBuilding', 'PrivateParking', 'HomeCharger', 'Public'];
+const STATION_TYPES: readonly string[] = ['AppartmentBuilding', 'PrivateParking', 'HomeCharger', 'Public'];
 
 const BOUNDS = { minLat: 59.85, maxLat: 59.98, minLng: 10.6, maxLng: 10.95 };
 

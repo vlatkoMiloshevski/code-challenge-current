@@ -11,9 +11,6 @@ export class FavoritesService {
     () => new Set([...this.stationIds(), ...this.chargePoints().map((point) => point.stationId)]),
   );
 
-  readonly stationCount = computed(() => this.stationIds().length);
-  readonly connectorCount = computed(() => this.chargePoints().length);
-
   constructor() {
     const stored = loadFavorites();
     this.stationIds.set(stored.stations);

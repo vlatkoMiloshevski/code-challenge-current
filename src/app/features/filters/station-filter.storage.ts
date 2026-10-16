@@ -2,7 +2,22 @@ import { MARKER_CONNECTORS, MARKER_STATUSES, NO_FILTERS, StationFilters } from '
 
 const STORAGE_KEY = 'station-filters';
 
-export function parseStationFilters(raw: string | null): StationFilters {
+export function loadStationFilters(): StationFilters {
+  try {
+    return parseStationFilters(localStorage.getItem(STORAGE_KEY));
+  } catch {
+    return NO_FILTERS;
+  }
+}
+
+export function saveStationFilters(filters: StationFilters): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+  } catch {
+  }
+}
+
+function parseStationFilters(raw: string | null): StationFilters {
   if (!raw) {
     return NO_FILTERS;
   }
@@ -22,20 +37,5 @@ export function parseStationFilters(raw: string | null): StationFilters {
     };
   } catch {
     return NO_FILTERS;
-  }
-}
-
-export function loadStationFilters(): StationFilters {
-  try {
-    return parseStationFilters(localStorage.getItem(STORAGE_KEY));
-  } catch {
-    return NO_FILTERS;
-  }
-}
-
-export function saveStationFilters(filters: StationFilters): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
-  } catch {
   }
 }

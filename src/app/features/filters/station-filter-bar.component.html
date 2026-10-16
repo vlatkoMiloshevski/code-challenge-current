@@ -33,7 +33,7 @@
           [checked]="isStatusSelected(status)"
           (ionChange)="setStatus(status, $event.detail.checked)"
         >
-          {{ statusLabels[status] }}
+          {{ status | titlecase  }}
         </ion-checkbox>
       }
     </div>

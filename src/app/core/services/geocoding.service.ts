@@ -16,13 +16,8 @@ interface NominatimResultDto {
   display_name: string;
 }
 
-export type GeocodingErrorKind = 'network' | 'server' | 'invalid';
-
 export class GeocodingError extends Error {
-  constructor(
-    readonly kind: GeocodingErrorKind,
-    message: string,
-  ) {
+  constructor(message: string) {
     super(message);
     this.name = 'GeocodingError';
   }
@@ -41,7 +36,7 @@ export class GeocodingService {
     return this.http.get<NominatimResultDto[]>(GEOCODING.searchUrl, { params }).pipe(
       map((rows) => {
         if (!Array.isArray(rows)) {
-          throw new GeocodingError('invalid', 'Unexpected response from the address search.');
+          throw new GeocodingError('Unexpected response from the address search.');
         }
         return rows.flatMap((row) => {
           const latitude = Number(row.lat);
@@ -62,9 +57,9 @@ function toGeocodingError(error: unknown): GeocodingError {
   }
   if (error instanceof HttpErrorResponse) {
     if (error.status === 0) {
-      return new GeocodingError('network', 'Could not reach the address search. Check your connection.');
+      return new GeocodingError('Could not reach the address search. Check your connection.');
     }
-    return new GeocodingError('server', `Address search responded with status ${error.status}.`);
+    return new GeocodingError(`Address search responded with status ${error.status}.`);
   }
-  return new GeocodingError('network', 'Unexpected error during the address search.');
+  return new GeocodingError('Unexpected error during the address search.');
 }

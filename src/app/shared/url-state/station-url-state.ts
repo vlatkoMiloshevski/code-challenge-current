@@ -1,7 +1,7 @@
 import { ParamMap, Params } from '@angular/router';
 
-import { MARKER_CONNECTORS, MARKER_STATUSES, StationFilters } from '../filters/station-filters';
-import { MarkerStatus } from '../map/station-geojson';
+import { MARKER_CONNECTORS, MARKER_STATUSES, StationFilters } from '../../features/filters/station-filters';
+import { MarkerStatus } from '../../features/map/station-geojson';
 import { MarkerConnector } from '../../core/models/station.model';
 
 export const FAVORITES_VIEW = 'favorites';

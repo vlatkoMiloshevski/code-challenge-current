@@ -3,20 +3,34 @@ export interface FavoriteChargePoint {
   chargePointId: number;
 }
 
-export interface StoredFavorites {
+interface StoredFavorites {
   stations: number[];
   chargePoints: FavoriteChargePoint[];
 }
 
-export const NO_FAVORITES: StoredFavorites = { stations: [], chargePoints: [] };
-
+const NO_FAVORITES: StoredFavorites = { stations: [], chargePoints: [] };
 const STORAGE_KEY = 'favorites';
+
+export function loadFavorites(): StoredFavorites {
+  try {
+    return parseFavorites(localStorage.getItem(STORAGE_KEY));
+  } catch {
+    return NO_FAVORITES;
+  }
+}
+
+export function saveFavorites(favorites: StoredFavorites): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+  } catch {
+  }
+}
 
 function isId(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value > 0;
 }
 
-export function parseFavorites(raw: string | null): StoredFavorites {
+function parseFavorites(raw: string | null): StoredFavorites {
   if (!raw) {
     return NO_FAVORITES;
   }
@@ -39,20 +53,5 @@ export function parseFavorites(raw: string | null): StoredFavorites {
     return { stations: [...new Set(stationIds)], chargePoints: points };
   } catch {
     return NO_FAVORITES;
-  }
-}
-
-export function loadFavorites(): StoredFavorites {
-  try {
-    return parseFavorites(localStorage.getItem(STORAGE_KEY));
-  } catch {
-    return NO_FAVORITES;
-  }
-}
-
-export function saveFavorites(favorites: StoredFavorites): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
-  } catch {
   }
 }

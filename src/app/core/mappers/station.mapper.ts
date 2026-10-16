@@ -1,4 +1,3 @@
-import { StationApiError } from '../api/station-api.error';
 import {
   ChargePointDto,
   ConnectorTypeDto,
@@ -8,16 +7,11 @@ import {
 } from '../api/station-api.dto';
 import {
   ChargePoint,
-  ChargePointStatus,
   ConnectorType,
   Station,
   StationConnector,
   StationDetail,
-  StationType,
 } from '../models/station.model';
-
-const STATION_TYPES: readonly StationType[] = ['AppartmentBuilding', 'PrivateParking', 'HomeCharger', 'Public'];
-const CHARGE_POINT_STATUSES: readonly ChargePointStatus[] = ['Available', 'Preparing'];
 
 export function mapConnectorType(dto: ConnectorTypeDto): ConnectorType {
   return {
@@ -36,20 +30,6 @@ export function mapStationConnector(dto: StationConnectorDto): StationConnector 
   };
 }
 
-export function mapStationType(value: string): StationType {
-  if (!(STATION_TYPES as readonly string[]).includes(value)) {
-    throw new StationApiError('invalid', `Unknown station type: "${value}".`);
-  }
-  return value as StationType;
-}
-
-export function mapChargePointStatus(value: string): ChargePointStatus {
-  if (!(CHARGE_POINT_STATUSES as readonly string[]).includes(value)) {
-    throw new StationApiError('invalid', `Unknown charge point status: "${value}".`);
-  }
-  return value as ChargePointStatus;
-}
-
 export function mapStation(dto: StationDto): Station {
   return {
     id: dto.PK_ChargingStationID,
@@ -62,7 +42,7 @@ export function mapStation(dto: StationDto): Station {
     longitude: dto.Longitude,
     operatorName: dto.OperatorName,
     operatorLogoUrl: dto.OperatorLogoURL,
-    type: mapStationType(dto.ChargingStationType),
+    type: dto.ChargingStationType,
     isOpen: dto.IsOpen,
     isActive: dto.IsActive,
     isFavorite: dto.IsFavorite,
@@ -86,7 +66,7 @@ export function mapChargePoint(dto: ChargePointDto): ChargePoint {
     isActive: dto.IsActive,
     isOpen: dto.IsOpen,
     isFavorite: dto.IsFavorite,
-    status: mapChargePointStatus(dto.CurrentStatus),
+    status: dto.CurrentStatus,
     maxKw: dto.MaxKW,
     volts: dto.Volts,
     connectors: dto.ConnectorTypes.map(mapConnectorType),

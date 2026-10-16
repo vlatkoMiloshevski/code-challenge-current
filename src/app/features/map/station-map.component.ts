@@ -210,7 +210,6 @@ export class StationMapComponent implements OnDestroy {
       padding: { top: 160, bottom: 60, left: 40, right: 40 },
       maxZoom: 13,
       duration,
-      essential: duration > 0,
     });
     this.hasFitted = true;
   }

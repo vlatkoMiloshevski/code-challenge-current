@@ -1,6 +1,4 @@
 
-export type StationType = 'AppartmentBuilding' | 'PrivateParking' | 'HomeCharger' | 'Public';
-export type ChargePointStatus = 'Available' | 'Preparing';
 export type MarkerConnector = 'CCS2' | 'Type - 2' | 'CHAdeMO';
 
 export interface ConnectorType {
@@ -27,7 +25,7 @@ export interface Station {
   longitude: number;
   operatorName: string;
   operatorLogoUrl: string;
-  type: StationType;
+  type: string;
   isOpen: boolean;
   isActive: boolean;
   isFavorite: boolean;
@@ -44,7 +42,7 @@ export interface ChargePoint {
   isActive: boolean;
   isOpen: boolean;
   isFavorite: boolean;
-  status: ChargePointStatus;
+  status: string;
   maxKw: number;
   volts: number;
   connectors: ConnectorType[];

@@ -37,7 +37,7 @@ import {
   isFavoritesView,
   parseFilters,
   parseStationId,
-} from '../features/url-state/station-url-state';
+} from '../shared/url-state/station-url-state';
 
 const DESKTOP_QUERY = '(min-width: 768px)';
 

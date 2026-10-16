@@ -7,8 +7,7 @@
 <ion-content [scrollY]="false">
   @if (loading()) {
     <div class="state-center">
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>Loading stations…</p>
+      <ion-spinner name="crescent" role="status" aria-label="Loading stations"></ion-spinner>
     </div>
   } @else if (errorMessage(); as message) {
     <div class="state-center">

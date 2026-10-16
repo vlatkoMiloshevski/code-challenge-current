@@ -4,18 +4,13 @@ import { IonButton, IonCheckbox, IonIcon, IonToggle } from '@ionic/angular';
 import { MARKER_CONNECTORS, MARKER_STATUSES, StationFilters, hasActiveFilters } from './station-filters';
 import { MarkerStatus } from '../map/station-geojson';
 import { MarkerConnector } from '../../core/models/station.model';
-
-const STATUS_LABELS: Record<MarkerStatus, string> = {
-  available: 'Available',
-  full: 'Full',
-  closed: 'Closed',
-};
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-station-filter-bar',
   templateUrl: 'station-filter-bar.component.html',
   styleUrl: 'station-filter-bar.component.scss',
-  imports: [IonButton, IonCheckbox, IonIcon, IonToggle],
+  imports: [IonButton, IonCheckbox, IonIcon, IonToggle, TitleCasePipe],
 })
 export class StationFilterBarComponent {
   readonly filters = input.required<StationFilters>();
@@ -25,7 +20,6 @@ export class StationFilterBarComponent {
   readonly favoritesToggled = output<void>();
 
   protected readonly statusOptions = MARKER_STATUSES;
-  protected readonly statusLabels = STATUS_LABELS;
   protected readonly connectorOptions = MARKER_CONNECTORS;
 
   protected readonly expanded = signal(false);
