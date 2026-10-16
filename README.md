@@ -33,7 +33,7 @@ Then open `http://localhost:4200/`. The app redirects to `/home`.
 - **Map:** stations are drawn as markers. Nearby stations are grouped into clusters with a count. Click a cluster to zoom into it. The marker color shows the status: green for available, red for full, gray for closed.
 - **Station details:** click a marker to open the details. The panel shows the connectors, the charge points (status, power, voltage, charger code and connector types), pricing, and the operator's contact information.
 - **Filters:** filter by status (Available, Full, Closed) and by connector type. Filters are saved in `localStorage` and restored on the next visit.
-- **Address search:** type an address and press Enter. The results come from OpenStreetMap (Nominatim). Choose a result to move the map there.
+- **Address search:** type an address and wait about a second, or press Enter to search immediately. The results come from OpenStreetMap (Nominatim). Choose a result to move the map there.
 - **My location:** use the location button on the map. The browser asks for permission. If permission is denied or the position is unavailable, a message explains why.
 - **Favorites:** click the star on a station or on a charge point (connector) to save it. The **Favorites** chip under the filters shows only favorite stations, and shows the counts of saved stations and connectors. Favorites are saved in `localStorage`.
 
@@ -79,7 +79,7 @@ Data flow: `StationApiService` loads the stations and maps them to domain models
 
 - **Map library: MapLibre GL JS.** Clustering runs natively in a web worker on a GeoJSON source, so tens of thousands of markers are rendered with WebGL, not as DOM elements.
 - **Map style: OpenFreeMap.** A free vector style that needs no API key.
-- **Geocoding: Nominatim.** Free and without a key. The public instance allows about one request per second and does not allow autocomplete, so search runs only when the user presses Enter and the query needs at least 3 characters.
+- **Geocoding: Nominatim.** Free and without a key. The public instance allows about one request per second and does not allow autocomplete, so search runs about a second after the user stops typing (or on Enter) and the query needs at least 3 characters. Each search is one request. A pause in typing triggers it, so the request rate stays low, but this is still a search-as-you-type pattern and should be checked against the Nominatim usage policy before production.
 - **State in the URL.** Shareable state (station, search, filters, view) lives in the URL. Personal data (filters defaults and favorites) lives in `localStorage`.
 - **Strict data handling.** Unknown station types or charge point statuses are reported as an error instead of being guessed, so the UI shows an error state rather than wrong data.
 - **Detail endpoint.** The details endpoint does not accept a station id and returns the same record for every request. The app keeps the identity and status from the station list and takes only charge points, pricing and support information from the details response.
