@@ -51,6 +51,10 @@
     </ion-label>
   </ion-item>
 
+  <ion-item class="point-item">
+    <ion-label>Charging station type: {{ station().type }} </ion-label>
+  </ion-item>
+
   @if (loading()) {
     <div class="state-block">
       <ion-spinner name="crescent"></ion-spinner>
