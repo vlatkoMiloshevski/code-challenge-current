@@ -14,7 +14,7 @@ Feature: Home page
   Scenario: The page shows an error and retries when the station service fails
     Given the station service fails on the first request only
     When I open the home page
-    Then I see the message "Could not reach the station service. Check your connection."
+    Then I see the message "Could not reach the server. Check your connection."
     When I click "Try again"
     Then the stations are loaded
 

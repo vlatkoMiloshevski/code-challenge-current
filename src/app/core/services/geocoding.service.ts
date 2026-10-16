@@ -1,6 +1,6 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { GEOCODING } from '../config/geocoding.config';
 
@@ -43,20 +43,6 @@ export class GeocodingService {
             : [];
         });
       }),
-      catchError((error: unknown) => throwError(() => toGeocodingError(error))),
     );
   }
-}
-
-function toGeocodingError(error: unknown): GeocodingError {
-  if (error instanceof GeocodingError) {
-    return error;
-  }
-  if (error instanceof HttpErrorResponse) {
-    if (error.status === 0) {
-      return new GeocodingError('Could not reach the address search. Check your connection.');
-    }
-    return new GeocodingError(`Address search responded with status ${error.status}.`);
-  }
-  return new GeocodingError('Unexpected error during the address search.');
 }

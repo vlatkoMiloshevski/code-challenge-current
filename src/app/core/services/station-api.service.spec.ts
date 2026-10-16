@@ -1,10 +1,11 @@
 import { Observable } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { STATION_API } from '../config/station-api.config';
 import { Station, StationDetail } from '../models/station.model';
+import { httpInterceptor } from '../interceptors/http.interceptor';
 import { StationApiService } from './station-api.service';
 import { makeStation, makeStationDetailDto, makeStationDto } from '../../../testing/fixtures';
 
@@ -13,7 +14,9 @@ describe('StationApiService', () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(withInterceptors([httpInterceptor])), provideHttpClientTesting()],
+    });
     service = TestBed.inject(StationApiService);
     http = TestBed.inject(HttpTestingController);
   });
@@ -41,13 +44,13 @@ describe('StationApiService', () => {
     it('reports a network error when the service cannot be reached', () => {
       const error = captureError(service.getStationDetail(makeStation()));
       http.expectOne(STATION_API.stationDetailUrl).error(new ProgressEvent('error'), { status: 0, statusText: '' });
-      expect(error()?.message).toBe('Could not reach the station service. Check your connection.');
+      expect(error()?.message).toBe('Could not reach the server. Check your connection.');
     });
 
     it('reports the status code for a server error', () => {
       const error = captureError(service.getStationDetail(makeStation()));
       http.expectOne(STATION_API.stationDetailUrl).flush('boom', { status: 500, statusText: 'Server Error' });
-      expect(error()?.message).toBe('Station service responded with status 500.');
+      expect(error()?.message).toBe('The server responded with status 500.');
     });
 
     it('reports an unexpected shape when the Result is missing', () => {
