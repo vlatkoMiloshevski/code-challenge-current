@@ -1,6 +1,6 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { StationApiError } from '../api/station-api.error';
 import { StationDetailResponseDto, StationListResponseDto } from '../api/station-api.dto';
 import { Station, StationDetail } from '../models/station.model';
@@ -19,7 +19,6 @@ export class StationApiService {
         }
         return response.Result.map(mapStation);
       }),
-      catchError((error: unknown) => throwError(() => toStationApiError(error))),
     );
   }
 
@@ -31,20 +30,6 @@ export class StationApiService {
         }
         return mergeStationDetail(station, response.Result);
       }),
-      catchError((error: unknown) => throwError(() => toStationApiError(error))),
     );
   }
-}
-
-function toStationApiError(error: unknown): StationApiError {
-  if (error instanceof StationApiError) {
-    return error;
-  }
-  if (error instanceof HttpErrorResponse) {
-    if (error.status === 0) {
-      return new StationApiError('Could not reach the station service. Check your connection.');
-    }
-    return new StationApiError(`Station service responded with status ${error.status}.`);
-  }
-  return new StationApiError('Unexpected error while loading stations.');
 }

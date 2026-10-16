@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { GEOCODING } from '../config/geocoding.config';
+import { httpInterceptor } from '../interceptors/http.interceptor';
 import { GeocodeResult, GeocodingService } from './geocoding.service';
 
 describe('GeocodingService', () => {
@@ -10,7 +11,9 @@ describe('GeocodingService', () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(withInterceptors([httpInterceptor])), provideHttpClientTesting()],
+    });
     service = TestBed.inject(GeocodingService);
     http = TestBed.inject(HttpTestingController);
   });
@@ -69,7 +72,7 @@ describe('GeocodingService', () => {
       .expectOne((req) => req.url === GEOCODING.searchUrl)
       .error(new ProgressEvent('error'), { status: 0, statusText: '' });
 
-    expect(message).toBe('Could not reach the address search. Check your connection.');
+    expect(message).toBe('Could not reach the server. Check your connection.');
   });
 
   it('reports the status code for a server error', () => {
@@ -80,7 +83,7 @@ describe('GeocodingService', () => {
       .expectOne((req) => req.url === GEOCODING.searchUrl)
       .flush('rate limited', { status: 429, statusText: 'Too Many Requests' });
 
-    expect(message).toBe('Address search responded with status 429.');
+    expect(message).toBe('The server responded with status 429.');
   });
 
   it('reports an unexpected response when the body is not a list', () => {

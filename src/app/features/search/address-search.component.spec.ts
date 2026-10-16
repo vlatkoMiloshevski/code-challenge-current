@@ -1,9 +1,10 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { GEOCODING } from '../../core/config/geocoding.config';
+import { httpInterceptor } from '../../core/interceptors/http.interceptor';
 import { AddressSearchComponent } from './address-search.component';
 
 describe('AddressSearchComponent', () => {
@@ -18,7 +19,9 @@ describe('AddressSearchComponent', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(withInterceptors([httpInterceptor])), provideHttpClientTesting()],
+    });
     // The Ionic elements are not needed to test the search logic.
     TestBed.overrideComponent(AddressSearchComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } });
     fixture = TestBed.createComponent(AddressSearchComponent);
@@ -106,7 +109,7 @@ describe('AddressSearchComponent', () => {
 
     expectSearchRequest().flush('oops', { status: 500, statusText: 'Server Error' });
 
-    expect(component['errorMessage']()).toBe('Address search responded with status 500.');
+    expect(component['errorMessage']()).toBe('The server responded with status 500.');
     expect(component['searching']()).toBe(false);
   });
 });

@@ -1,10 +1,11 @@
 import { DecimalPipe } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { STATION_API } from '../../core/config/station-api.config';
+import { httpInterceptor } from '../../core/interceptors/http.interceptor';
 import { makeStation, makeStationDetailDto } from '../../../testing/fixtures';
 import { StationDetailsComponent } from './station-details.component';
 
@@ -22,7 +23,9 @@ describe('StationDetailsComponent', () => {
   }
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(withInterceptors([httpInterceptor])), provideHttpClientTesting()],
+    });
     // Ionic elements are replaced by plain elements; the pipe is still needed for the template.
     TestBed.overrideComponent(StationDetailsComponent, {
       set: { imports: [DecimalPipe], schemas: [NO_ERRORS_SCHEMA] },
@@ -63,7 +66,7 @@ describe('StationDetailsComponent', () => {
     expectDetailRequest().flush('boom', { status: 500, statusText: 'Server Error' });
     settle();
 
-    expect(component['errorMessage']()).toBe('Station service responded with status 500.');
+    expect(component['errorMessage']()).toBe('The server responded with status 500.');
     expect(component['detail']()).toBeNull();
 
     component['retry']();
