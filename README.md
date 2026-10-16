@@ -133,4 +133,12 @@ Priority areas for tests:
 npm run build
 ```
 
+### Run the production build
+
+```bash
+npx ng serve --configuration production
+```
+
+Then open `http://localhost:4200/`. This uses the production configuration (optimized build, no source maps, synthetic-station helper removed). It is still the Angular dev server, not a static host.
+
 The output is written to `dist/`. The MapLibre web worker is copied to `assets/maplibre/` and the star and close icons to `assets/icons/` (see `angular.json`).
