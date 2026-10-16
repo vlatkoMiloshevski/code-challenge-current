@@ -68,3 +68,9 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Playwright
+/.features-gen
+/playwright-report
+/test-results
+/e2e/.playwright-output

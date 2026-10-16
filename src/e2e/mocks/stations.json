@@ -1,0 +1,85 @@
+{
+  "Result": [
+    {
+      "PK_ChargingStationID": 1,
+      "Name": "Alpha Charge",
+      "Address": "Storgata 1",
+      "PostCode": "0155",
+      "Town": "Oslo",
+      "StateOrProvince": "Oslo",
+      "Country": "Norway",
+      "Latitude": 59.9111,
+      "Longitude": 10.7488,
+      "kWhMin": 7.4,
+      "kWhMax": 22.2,
+      "Distance": 0,
+      "IsOpen": true,
+      "IsActive": true,
+      "IsFavorite": false,
+      "availableBoxes": 1,
+      "occupiedBoxes": 1,
+      "offlineBoxes": 0,
+      "totalBoxes": 2,
+      "Connectors": [
+        { "PK_CPConnectorTypeID": 9, "Name": "CCS2", "IconName": "ccs2", "ConnectorType": 33, "Amount": 2, "Available": 1 }
+      ],
+      "OperatorName": "Operator A",
+      "OperatorLogoURL": "",
+      "ChargingStationType": "Public"
+    },
+    {
+      "PK_ChargingStationID": 2,
+      "Name": "Beta Charge",
+      "Address": "Karl Johans gate 2",
+      "PostCode": "0154",
+      "Town": "Oslo",
+      "StateOrProvince": "Oslo",
+      "Country": "Norway",
+      "Latitude": 59.9139,
+      "Longitude": 10.7522,
+      "kWhMin": 22,
+      "kWhMax": 50,
+      "Distance": 0,
+      "IsOpen": true,
+      "IsActive": true,
+      "IsFavorite": false,
+      "availableBoxes": 0,
+      "occupiedBoxes": 2,
+      "offlineBoxes": 0,
+      "totalBoxes": 2,
+      "Connectors": [
+        { "PK_CPConnectorTypeID": 6, "Name": "CHAdeMO", "IconName": "chademo", "ConnectorType": 40, "Amount": 1, "Available": 0 }
+      ],
+      "OperatorName": "Operator B",
+      "OperatorLogoURL": "",
+      "ChargingStationType": "Public"
+    },
+    {
+      "PK_ChargingStationID": 3,
+      "Name": "Gamma Charge",
+      "Address": "Dronningens gate 3",
+      "PostCode": "0152",
+      "Town": "Oslo",
+      "StateOrProvince": "Oslo",
+      "Country": "Norway",
+      "Latitude": 59.9072,
+      "Longitude": 10.7531,
+      "kWhMin": 3.7,
+      "kWhMax": 11,
+      "Distance": 0,
+      "IsOpen": false,
+      "IsActive": true,
+      "IsFavorite": false,
+      "availableBoxes": 0,
+      "occupiedBoxes": 0,
+      "offlineBoxes": 2,
+      "totalBoxes": 2,
+      "Connectors": [
+        { "PK_CPConnectorTypeID": 4, "Name": "Type - 2", "IconName": "type-2", "ConnectorType": 25, "Amount": 2, "Available": 0 }
+      ],
+      "OperatorName": "Operator C",
+      "OperatorLogoURL": "",
+      "ChargingStationType": "HomeCharger"
+    }
+  ]
+}
