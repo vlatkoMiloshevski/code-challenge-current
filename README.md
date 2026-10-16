@@ -27,15 +27,8 @@ Then open `http://localhost:4200/`. The app redirects to `/home`.
 | `npm run watch` | Development build that rebuilds on change |
 | `npm run lint` | Run ESLint |
 | `npm test` | Run unit tests (see [Testing](#testing)) |
-
-## Usage
-
-- **Map:** stations are drawn as markers. Nearby stations are grouped into clusters with a count. Click a cluster to zoom into it. The marker color shows the status: green for available, red for full, gray for closed.
-- **Station details:** click a marker to open the details. The panel shows the connectors, the charge points (status, power, voltage, charger code and connector types), pricing, and the operator's contact information.
-- **Filters:** filter by status (Available, Full, Closed) and by connector type. Filters are saved in `localStorage` and restored on the next visit.
-- **Address search:** type an address and wait about a second, or press Enter to search immediately. The results come from OpenStreetMap (Nominatim). Choose a result to move the map there.
-- **My location:** use the location button on the map. The browser asks for permission. If permission is denied or the position is unavailable, a message explains why.
-- **Favorites:** click the star on a station or on a charge point (connector) to save it. The **Favorites** chip under the filters shows only favorite stations, and shows the counts of saved stations and connectors. Favorites are saved in `localStorage`.
+| `npm run e2e:e2e` | Generate the BDD tests and run the Playwright end-to-end tests |
+| `npm run e2e:e2e-ui` | Same as above, in Playwright UI mode |
 
 ## Shareable URL state
 
@@ -59,18 +52,27 @@ src/app
 │   ├── api              Raw API response types (DTOs) and the error class
 │   ├── config           Endpoints and geocoding settings
 │   ├── dev              Development-only helper (synthetic stations)
+│   ├── interceptors     HTTP interceptor
 │   ├── mappers          Conversion from API types to domain models
 │   ├── models           Domain models used by the UI
 │   ├── services         HTTP services (stations, geocoding)
-│   └── ui               Small UI helpers (media query signal)
+│   └── utils            Small helpers (media query signal)
 ├── features
 │   ├── favorites        Favorite stations and connectors (service and storage)
 │   ├── filters          Filter logic, filter bar and filter storage
 │   ├── map              MapLibre map component and GeoJSON conversion
 │   ├── search           Address search component
-│   ├── station-details  Station details (side panel or bottom sheet)
+│   └── station-details  Station details (side panel or bottom sheet)
+├── shared
 │   └── url-state        Reading and writing the URL parameters
 └── home                 Page that connects the features
+
+src/e2e                  End-to-end tests (Playwright with playwright-bdd)
+├── features             Gherkin scenarios (*.feature)
+├── steps                Step definitions for the scenarios
+└── mocks                Mocked API responses used by the tests
+
+src/testing              Shared test helpers and the Ionic stub for Jest
 ```
 
 Data flow: `StationApiService` loads the stations and maps them to domain models. `HomePage` reads the URL parameters, derives the visible stations, and passes them to the map and the filter bar. Filters, favorites and search write to the URL or to `localStorage`, and the page reacts to those changes.
@@ -129,9 +131,21 @@ Covered areas:
 - **Filtering:** status and connector logic, and saving and restoring filters in `localStorage` (`station-filters.spec.ts`, `station-filter.storage.spec.ts`).
 - **Searching:** the geocoding request and response handling, and the debounce, Enter, clear and error behavior of the search box (`geocoding.service.spec.ts`, `address-search.component.spec.ts`).
 - **Favorites:** toggling, persistence and handling of invalid stored data (`favorites.service.spec.ts`).
-- **URL state:** parsing and writing the URL parameters (`station-url-state.spec.ts`).
+- **URL state:** parsing and writing the URL parameters (`shared/url-state/station-url-state.spec.ts`).
 
 The Ionic package is replaced by a stub in tests (`src/testing/ionic-angular.stub.ts`), because Jest cannot load it. Component tests therefore check logic, not Ionic rendering. Map rendering (`maplibre-gl`) is not covered yet.
+
+### End-to-end tests
+
+End-to-end tests use Playwright with [playwright-bdd](https://github.com/vitalets/playwright-bdd). The scenarios are written in Gherkin (`Given` / `When` / `Then`) in `src/e2e/features/`, and the step definitions are in `src/e2e/steps/`. The station, detail and geocoding API responses are mocked from `src/e2e/mocks/`, so the tests do not depend on the external services.
+
+```bash
+npm run e2e:e2e
+```
+
+The command generates the test files from the feature files (`bddgen`) and runs Playwright in Chromium. It starts the dev server on `http://localhost:4200` if it is not already running. The HTML report is written to `e2e/.playwright-output`.
+
+Covered scenarios on the home page: loading the stations, the empty state, the error state with retry, filters from the URL, filter selection, the favorites view, opening station details from the URL, and address search.
 
 ## Build
 
