@@ -1,52 +1,84 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Charging stations</ion-title>
+    <ion-title>CURRENT</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [scrollY]="false">
   @if (loading()) {
-    <div class="state-center">
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>Loading stations…</p>
-    </div>
+  <div class="state-center">
+    <ion-spinner name="crescent" role="status" aria-label="Loading stations"></ion-spinner>
+  </div>
   } @else if (errorMessage(); as message) {
-    <div class="state-center">
-      <ion-text color="danger">
-        <p>{{ message }}</p>
-      </ion-text>
-      <ion-button (click)="load()">Try again</ion-button>
-    </div>
-  } @else if (stations(); as list) {
-    @if (list.length === 0) {
-      <div class="state-center">
-        <p>No charging stations found.</p>
-      </div>
-    } @else {
-      <app-station-map [stations]="list" (stationSelected)="onStationSelected($event)"></app-station-map>
-    }
-  }
+  <div class="state-center">
+    <ion-text color="danger">
+      <p>{{ message }}</p>
+    </ion-text>
+    <ion-button (click)="load()">Try again</ion-button>
+  </div>
+  } @else if (stations(); as list) { @if (list.length === 0) {
+  <div class="state-center">
+    <p>No charging stations found.</p>
+  </div>
+  } @else {
+  <app-station-map
+    [stations]="visibleStations()"
+    [viewKey]="favoritesView() ? 'favorites' : 'all'"
+    [focusPoint]="focusPoint()"
+    (stationSelected)="onStationSelected($event)"
+    (locationFound)="onLocationFound()"
+    (locationError)="onLocationError($event)"
+  ></app-station-map>
 
-  @if (isDesktop() && selectedStation(); as station) {
-    <aside class="side-panel">
-      <app-station-details [station]="station" [showClose]="true" (closed)="closeDetails()"></app-station-details>
-    </aside>
+  <div class="filter-overlay" [class.shift-for-panel]="isDesktop() && selectedStation() !== null">
+    <app-address-search
+      [initialQuery]="searchText()"
+      (resultSelected)="onAddressSelected($event)"
+      (searchChanged)="onSearchChanged($event)"
+    ></app-address-search>
+
+    @if (locationMessage(); as message) {
+    <p class="notice" role="status">{{ message }}</p>
+    }
+
+    <app-station-filter-bar
+      [filters]="filters()"
+      [favoritesView]="favoritesView()"
+      (filtersChange)="onFiltersChange($event)"
+      (favoritesToggled)="toggleFavoritesView()"
+    ></app-station-filter-bar>
+  </div>
+
+  @if (visibleStations().length === 0) {
+  <div class="no-match">
+    @if (favoritesView() && !hasFavorites()) {
+    <p>No favorites yet. Star a station or a charge point to see it here.</p>
+    } @else {
+    <p>No stations match the selected filters.</p>
+    @if (filtersActive()) {
+    <ion-button fill="outline" size="small" (click)="clearFilters()">Clear filters</ion-button>
+    } }
+  </div>
+  } } } @if (isDesktop() && selectedStation(); as station) {
+  <aside class="side-panel">
+    <app-station-details [station]="station" [showClose]="true" (closed)="closeDetails()"></app-station-details>
+  </aside>
   }
 </ion-content>
 
 @if (!isDesktop()) {
-  <ion-modal
-    [isOpen]="selectedStation() !== null"
-    [breakpoints]="[0, 0.5, 1]"
-    [initialBreakpoint]="0.5"
-    (didDismiss)="closeDetails()"
-  >
-    <ng-template>
-      <ion-content>
-        @if (selectedStation(); as station) {
-          <app-station-details [station]="station"></app-station-details>
-        }
-      </ion-content>
-    </ng-template>
-  </ion-modal>
+<ion-modal
+  [isOpen]="selectedStation() !== null"
+  [breakpoints]="[0, 0.5, 1]"
+  [initialBreakpoint]="0.5"
+  (didDismiss)="closeDetails()"
+>
+  <ng-template>
+    <ion-content>
+      @if (selectedStation(); as station) {
+      <app-station-details [station]="station"></app-station-details>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>
 }

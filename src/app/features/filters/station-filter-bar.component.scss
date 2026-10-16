@@ -1,0 +1,122 @@
+:host {
+  display: block;
+  color: var(--ion-color-medium);
+}
+
+.filters-header {
+  margin-top: 8px;
+  padding: 8px 8px 8px;
+  border-top: 1px solid var(--ion-border-color, rgba(128, 128, 128, 0.3));
+}
+
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.section-toggle:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+.section-toggle ion-icon {
+  margin-left: auto;
+  font-size: 18px;
+}
+
+.filter-groups {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 24px;
+  padding: 4px 16px 16px;
+}
+
+// The groups stay in the DOM and are only hidden, so the arrow does not re-create them.
+.filter-groups[hidden] {
+  display: none;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.group-caption {
+  margin: 0 0 2px;
+  color: var(--ion-color-medium);
+  font-size: 12px;
+}
+
+ion-checkbox {
+  font-size: 14px;
+  --border-radius: 0;
+}
+
+.favorites-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 16px 0;
+  border-top: 1px solid var(--ion-border-color, rgba(128, 128, 128, 0.3));
+}
+
+.clear-filters {
+  display: flex;
+  flex: 0 0 100%;
+  justify-content: flex-end;
+}
+
+.clear-filters ion-button::part(native) {
+  font-size: 12px;
+}
+
+.favorites-label {
+  font-size: 15px;
+}
+
+ion-toggle {
+  --handle-width: 12px;
+  --handle-height: 12px;
+  --handle-max-height: 12px;
+  --handle-spacing: 2px;
+  width: 40px;
+  height: 20px;
+  overflow: hidden;
+}
+
+ion-toggle::part(track) {
+  width: 40px;
+  height: 20px;
+  border-radius: 13px;
+}
+
+ion-chip {
+  flex: 0 0 auto;
+  margin: 0;
+  height: 24px;
+  min-height: 24px;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-radius: 6px;
+}
+
+ion-chip:hover,
+ion-chip:active {
+  filter: brightness(0.8);
+}

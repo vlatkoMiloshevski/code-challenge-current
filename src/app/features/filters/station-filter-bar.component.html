@@ -1,0 +1,59 @@
+<div class="favorites-row">
+  <span class="favorites-label" id="favorites-label">Favorites</span>
+  <ion-toggle
+    size="small"
+    aria-labelledby="favorites-label"
+    [checked]="favoritesView()"
+    (ionChange)="onFavoritesSwitch($event.detail.checked)"
+  ></ion-toggle>
+</div>
+
+<div class="filters-header">
+  <button
+    type="button"
+    class="section-toggle"
+    [attr.aria-expanded]="expanded()"
+    aria-controls="station-filter-groups"
+    (click)="toggleExpanded()"
+  >
+    <span>Filters</span>
+    @if (anyActive()) {
+      <span aria-label="active filters">applied</span>
+    }
+    <ion-icon [src]="chevronIcon()" aria-hidden="true"></ion-icon>
+  </button>
+</div>
+
+<div id="station-filter-groups" class="filter-groups" [hidden]="!expanded()">
+  <div class="filter-group" role="group" aria-label="Status">
+    <p class="group-caption">By status</p>
+    @for (status of statusOptions; track status) {
+      <ion-checkbox
+        labelPlacement="end"
+        [checked]="isStatusSelected(status)"
+        (ionChange)="setStatus(status, $event.detail.checked)"
+      >
+        {{ status | titlecase }}
+      </ion-checkbox>
+    }
+  </div>
+
+  <div class="filter-group" role="group" aria-label="Connector types">
+    <p class="group-caption">By connector</p>
+    @for (connector of connectorOptions; track connector) {
+      <ion-checkbox
+        labelPlacement="end"
+        [checked]="isConnectorSelected(connector)"
+        (ionChange)="setConnector(connector, $event.detail.checked)"
+      >
+        {{ connector }}
+      </ion-checkbox>
+    }
+  </div>
+
+  @if (anyActive()) {
+    <div class="clear-filters">
+      <ion-button fill="outline" size="small" (click)="clear()">Clear filters</ion-button>
+    </div>
+  }
+</div>

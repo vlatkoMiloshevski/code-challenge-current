@@ -1,0 +1,31 @@
+<ion-searchbar
+  placeholder="Search address"
+  aria-label="Search address"
+  [value]="query()"
+  (ionInput)="onInput($event.detail.value)"
+  (keyup.enter)="submit()"
+  (ionClear)="clear()"
+></ion-searchbar>
+
+@if (searching()) {
+  <div class="status">
+    <ion-spinner name="crescent"></ion-spinner>
+    <span>Searching…</span>
+  </div>
+} @else if (errorMessage(); as message) {
+  <ion-text color="danger">
+    <p class="status">{{ message }}</p>
+  </ion-text>
+} @else if (results(); as list) {
+  @if (list.length === 0) {
+    <p class="status">No addresses found.</p>
+  } @else {
+    <ion-list lines="full" class="results">
+      @for (result of list; track $index) {
+        <ion-item button detail="false" (click)="select(result)">
+          <ion-label class="ion-text-wrap">{{ result.label }}</ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  }
+}

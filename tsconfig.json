@@ -19,6 +19,7 @@
     "module": "es2020",
     "lib": ["es2022", "dom"],
     "skipLibCheck": true,
+    "types": ["jest"],
     "useDefineForClassFields": false
   },
   "angularCompilerOptions": {

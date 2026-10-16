@@ -1,6 +1,3 @@
-// Raw response shapes returned by the dummyjson endpoints.
-// These mirror the API exactly and are converted to domain models in station.mapper.ts.
-
 export interface ConnectorTypeDto {
   PK_CPConnectorTypeID: number;
   Name: string;

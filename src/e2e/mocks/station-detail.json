@@ -1,0 +1,40 @@
+{
+  "Result": {
+    "Currency": "NOK",
+    "OwnedByCompanyName": "Owner AS",
+    "IsFavorite": false,
+    "IsOpen": true,
+    "ChargingPoints": [
+      {
+        "PK_ChargePointID": 10,
+        "Name": "Point A",
+        "ChargerCode": "A-1",
+        "IsActive": true,
+        "IsOpen": true,
+        "IsFavorite": false,
+        "CurrentStatus": "Available",
+        "MaxKWH": 22,
+        "MaxKW": 22,
+        "Volts": 400,
+        "ConnectorTypes": [
+          { "PK_CPConnectorTypeID": 9, "Name": "CCS2", "IconName": "ccs2", "ConnectorType": 33 }
+        ]
+      }
+    ],
+    "Summary": {
+      "PricingNow": {
+        "Type_Cost_Charging": "kWh",
+        "ChargingCostKWH": 3.5,
+        "CostPriceVATPercentage": 25,
+        "StartupCostPrice": 10,
+        "Currency": "NOK"
+      }
+    },
+    "SupportInformation": {
+      "PhoneNumberString": "+47 000 00 000",
+      "SupportEmail": "support@example.com",
+      "SupportWebsite": "https://example.com",
+      "SupportCustomerServiceURL": "https://example.com/help"
+    }
+  }
+}

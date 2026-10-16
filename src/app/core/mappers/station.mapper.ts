@@ -1,4 +1,3 @@
-import { StationApiError } from '../api/station-api.error';
 import {
   ChargePointDto,
   ConnectorTypeDto,
@@ -6,20 +5,7 @@ import {
   StationDetailDto,
   StationDto,
 } from '../api/station-api.dto';
-import {
-  ChargePoint,
-  ChargePointStatus,
-  ConnectorType,
-  Station,
-  StationConnector,
-  StationDetail,
-  StationType,
-} from '../models/station.model';
-
-const STATION_TYPES: readonly StationType[] = ['AppartmentBuilding', 'PrivateParking', 'HomeCharger', 'Public'];
-const CHARGE_POINT_STATUSES: readonly ChargePointStatus[] = ['Available', 'Preparing']; // | 'Occupied' | 'Offline';
-
-// Pure functions only, so the mapping can be unit tested without HTTP.
+import { ChargePoint, ConnectorType, Station, StationConnector, StationDetail } from '../models/station.model';
 
 export function mapConnectorType(dto: ConnectorTypeDto): ConnectorType {
   return {
@@ -38,22 +24,6 @@ export function mapStationConnector(dto: StationConnectorDto): StationConnector 
   };
 }
 
-// Unknown values throw an 'invalid' StationApiError. The domain unions have no fallback
-// value, so an unexpected value is reported to the UI as an error state instead of being guessed.
-export function mapStationType(value: string): StationType {
-  if (!(STATION_TYPES as readonly string[]).includes(value)) {
-    throw new StationApiError('invalid', `Unknown station type: "${value}".`);
-  }
-  return value as StationType;
-}
-
-export function mapChargePointStatus(value: string): ChargePointStatus {
-  if (!(CHARGE_POINT_STATUSES as readonly string[]).includes(value)) {
-    throw new StationApiError('invalid', `Unknown charge point status: "${value}".`);
-  }
-  return value as ChargePointStatus;
-}
-
 export function mapStation(dto: StationDto): Station {
   return {
     id: dto.PK_ChargingStationID,
@@ -66,7 +36,7 @@ export function mapStation(dto: StationDto): Station {
     longitude: dto.Longitude,
     operatorName: dto.OperatorName,
     operatorLogoUrl: dto.OperatorLogoURL,
-    type: mapStationType(dto.ChargingStationType),
+    type: dto.ChargingStationType,
     isOpen: dto.IsOpen,
     isActive: dto.IsActive,
     isFavorite: dto.IsFavorite,
@@ -90,18 +60,13 @@ export function mapChargePoint(dto: ChargePointDto): ChargePoint {
     isActive: dto.IsActive,
     isOpen: dto.IsOpen,
     isFavorite: dto.IsFavorite,
-    status: mapChargePointStatus(dto.CurrentStatus),
+    status: dto.CurrentStatus,
     maxKw: dto.MaxKW,
     volts: dto.Volts,
-    connectorTypes: dto.ConnectorTypes.map(mapConnectorType),
+    connectors: dto.ConnectorTypes.map(mapConnectorType),
   };
 }
 
-/**
- * The detail endpoint has no station id parameter, so its identity fields are not
- * reliable for a given marker. The base station (from the list) wins for identity and
- * status; the detail response only contributes charge points, pricing and support info.
- */
 export function mergeStationDetail(base: Station, dto: StationDetailDto): StationDetail {
   const pricing = dto.Summary?.PricingNow;
   const support = dto.SupportInformation;

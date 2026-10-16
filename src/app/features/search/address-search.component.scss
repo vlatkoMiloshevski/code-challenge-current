@@ -1,0 +1,27 @@
+ion-searchbar {
+  font-size: 15px;
+}
+
+:host ::ng-deep ion-searchbar .searchbar-input {
+  font-size: 15px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 12px 8px;
+  font-size: 14px;
+}
+
+.status p,
+p.status {
+  margin: 0;
+}
+
+.results {
+  max-height: 40vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+}

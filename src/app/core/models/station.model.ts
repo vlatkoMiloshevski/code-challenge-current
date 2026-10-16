@@ -1,21 +1,14 @@
-// Domain models used by the UI. These are independent of the API field names.
-
-export type StationType = 'AppartmentBuilding' | 'PrivateParking' | 'HomeCharger' | 'Public'; // | 'Other';
-
-/** Normalized charge point status. Unknown API values map to 'Unknown'. */
-export type ChargePointStatus = 'Available' | 'Preparing'; // | 'Occupied' | 'Offline' | 'Unknown';
+export type MarkerConnector = 'CCS2' | 'Type - 2' | 'CHAdeMO';
 
 export interface ConnectorType {
   id: number;
   name: string;
   iconName: string;
-  /** Numeric connector category from the API (e.g. 25 = Type 2, 40 = CHAdeMO). */
   category: number;
 }
 
 export interface StationConnector {
   type: ConnectorType;
-  /** Total number of connectors of this type at the station. */
   amount: number;
   available: number;
 }
@@ -31,11 +24,10 @@ export interface Station {
   longitude: number;
   operatorName: string;
   operatorLogoUrl: string;
-  type: StationType;
+  type: string;
   isOpen: boolean;
   isActive: boolean;
   isFavorite: boolean;
-  /** Distance as delivered by the API. The unit is not documented; verify before displaying. */
   distance: number;
   power: { minKwh: number; maxKwh: number };
   boxes: { total: number; available: number; occupied: number; offline: number };
@@ -49,10 +41,10 @@ export interface ChargePoint {
   isActive: boolean;
   isOpen: boolean;
   isFavorite: boolean;
-  status: ChargePointStatus;
+  status: string;
   maxKw: number;
   volts: number;
-  connectorTypes: ConnectorType[];
+  connectors: ConnectorType[];
 }
 
 export interface Pricing {
@@ -70,10 +62,6 @@ export interface SupportInfo {
   customerServiceUrl: string;
 }
 
-/**
- * Full station details. Identity and status fields come from the list endpoint,
- * the detail endpoint adds charge points, pricing and support information.
- */
 export interface StationDetail extends Station {
   ownerName: string;
   pricing: Pricing | null;

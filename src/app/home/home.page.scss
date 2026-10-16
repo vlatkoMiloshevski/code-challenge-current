@@ -19,6 +19,50 @@ app-station-map {
   inset: 0;
 }
 
+.filter-overlay {
+  width: 400px;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  z-index: 2;
+  max-width: 100%;
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  border-radius: 8px;
+  background: var(--ion-color-light);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+}
+
+.notice {
+  margin: 0;
+  padding: 4px 12px 8px;
+  font-size: 14px;
+  color: var(--ion-color-danger);
+}
+
+.filter-overlay.shift-for-panel {
+  right: 396px;
+}
+
+.no-match {
+  position: absolute;
+  bottom: 30px;
+  left: 16px;
+  right: 16px;
+  transform: translateY(-50%);
+  z-index: 2;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  background: var(--ion-color-light);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+}
+
+.no-match p {
+  margin: 0 0 8px;
+}
+
 .side-panel {
   position: absolute;
   top: 0;
@@ -27,7 +71,7 @@ app-station-map {
   width: 380px;
   max-width: 100%;
   overflow-y: auto;
-  background: var(--ion-background-color);
+  background: var(--ion-color-light);
   box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
   z-index: 1;
 }

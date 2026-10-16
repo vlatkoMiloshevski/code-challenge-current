@@ -1,6 +1,5 @@
 import { Station } from '../../core/models/station.model';
 
-/** Visual state of a marker. Closed stations are shown first, then full, then available. */
 export type MarkerStatus = 'available' | 'full' | 'closed';
 
 export interface StationFeatureProperties {
@@ -29,10 +28,8 @@ export function markerStatus(station: Station): MarkerStatus {
   return station.boxes.available > 0 ? 'available' : 'full';
 }
 
-/** [[minLng, minLat], [maxLng, maxLat]], the format MapLibre's fitBounds expects. */
 export type LngLatBounds = [[number, number], [number, number]];
 
-/** Bounding box of all stations, or null when there are none. */
 export function stationsBounds(stations: readonly Station[]): LngLatBounds | null {
   if (stations.length === 0) {
     return null;
@@ -54,10 +51,6 @@ export function stationsBounds(stations: readonly Station[]): LngLatBounds | nul
   ];
 }
 
-/**
- * Converts stations to a GeoJSON collection. Coordinates are [lng, lat] per the GeoJSON spec.
- * Kept as a pure function so it can be tested and reused without the map.
- */
 export function stationsToFeatureCollection(stations: readonly Station[]): StationFeatureCollection {
   return {
     type: 'FeatureCollection',

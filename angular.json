@@ -19,7 +19,7 @@
           "builder": "@angular/build:application",
           "options": {
             "outputPath": {
-              "base": "www",
+              "base": "dist",
               "browser": ""
             },
             "index": "src/index.html",
@@ -38,7 +38,11 @@
                 "output": "assets/maplibre"
               }
             ],
-            "styles": ["node_modules/maplibre-gl/dist/maplibre-gl.css", "src/global.scss", "src/theme/variables.scss"],
+            "styles": [
+              "node_modules/maplibre-gl/dist/maplibre-gl.css",
+              "src/global.scss",
+              "src/theme/variables.scss"
+            ],
             "scripts": [],
             "browser": "src/main.ts"
           },
@@ -60,6 +64,10 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
+                },
+                {
+                  "replace": "src/app/core/dev/synthetic-stations.ts",
+                  "with": "src/app/core/dev/synthetic-stations.prod.ts"
                 }
               ],
               "outputHashing": "all"
@@ -80,7 +88,9 @@
           "builder": "@angular/build:dev-server",
           "options": {
             "prebundle": {
-              "exclude": ["maplibre-gl"]
+              "exclude": [
+                "maplibre-gl"
+              ]
             }
           },
           "configurations": {
@@ -102,23 +112,13 @@
             "buildTarget": "app:build"
           }
         },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "tsconfig.spec.json",
-            "buildTarget": "::development",
-            "setupFiles": ["src/test-setup.ts"]
-          },
-          "configurations": {
-            "ci": {
-              "watch": false
-            }
-          }
-        },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
           }
         }
       }
