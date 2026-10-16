@@ -61,25 +61,6 @@
   font-size: 12px;
 }
 
-.clear-filters {
-  display: flex;
-  justify-content: flex-end;
-  padding: 4px 12px 8px;
-}
-
-.clear-filters ion-button {
-  --padding-top: 0;
-  --padding-bottom: 0;
-  --padding-start: 8px;
-  --padding-end: 8px;
-  height: 24px;
-  min-height: 24px;
-}
-
-.clear-filters ion-button::part(native) {
-  font-size: 11px;
-}
-
 ion-checkbox {
   font-size: 14px;
   --border-radius: 0;
@@ -93,6 +74,16 @@ ion-checkbox {
   margin-top: 8px;
   padding: 8px 16px 0;
   border-top: 1px solid var(--ion-border-color, rgba(128, 128, 128, 0.3));
+}
+
+.clear-filters {
+  display: flex;
+  flex: 0 0 100%;
+  justify-content: flex-end;
+}
+
+.clear-filters ion-button::part(native) {
+  font-size: 12px;
 }
 
 .favorites-label {

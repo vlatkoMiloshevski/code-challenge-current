@@ -55,9 +55,9 @@
     <p>No favorites yet. Star a station or a charge point to see it here.</p>
     } @else {
     <p>No stations match the selected filters.</p>
-    } @if (filtersActive()) {
+    @if (filtersActive()) {
     <ion-button fill="outline" size="small" (click)="clearFilters()">Clear filters</ion-button>
-    }
+    } }
   </div>
   } } } @if (isDesktop() && selectedStation(); as station) {
   <aside class="side-panel">
