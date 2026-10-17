@@ -30,7 +30,11 @@
     (locationError)="onLocationError($event)"
   ></app-station-map>
 
-  <div class="filter-overlay" [class.shift-for-panel]="isDesktop() && selectedStation() !== null">
+  <div
+    class="filter-overlay"
+    [class.mobile]="!isDesktop()"
+    [class.shift-for-panel]="isDesktop() && selectedStation() !== null"
+  >
     <app-address-search
       [initialQuery]="searchText()"
       (resultSelected)="onAddressSelected($event)"
