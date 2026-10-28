@@ -73,10 +73,10 @@ jobs:
           path: e2e/.playwright-output/
           retention-days: 7
 
-  # Deploys only the build that passed every check, and only from dev.
+  # Deploys only the build that passed every check, and only from master.
   deploy:
     needs: [build, unit, e2e]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
