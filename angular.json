@@ -23,6 +23,7 @@
               "browser": ""
             },
             "index": "src/index.html",
+            "serviceWorker": "ngsw-config.json",
             "polyfills": [],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
