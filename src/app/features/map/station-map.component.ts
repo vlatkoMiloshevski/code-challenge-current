@@ -16,6 +16,20 @@ import { StationFeatureCollection, stationsBounds, stationsToFeatureCollection }
 
 export const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const MAP_WORKER_URL = '/assets/maplibre/maplibre-gl-worker.mjs';
+const MAP_STYLESHEET_URL = '/assets/maplibre/maplibre-gl.css';
+
+// The map stylesheet is about 80 KB. It is loaded with the map, not in the global styles, so the page does not wait for it.
+// A failed load resolves too: the map still works, only the controls are unstyled.
+function loadMapStylesheet(): Promise<void> {
+  return new Promise((resolve) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = MAP_STYLESHEET_URL;
+    link.onload = () => resolve();
+    link.onerror = () => resolve();
+    document.head.appendChild(link);
+  });
+}
 const STATIONS_SOURCE = 'stations';
 const CLUSTER_LAYER = 'clusters';
 const CLUSTER_COUNT_LAYER = 'cluster-count';
@@ -58,6 +72,7 @@ export class StationMapComponent implements OnDestroy {
   private readonly container = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map: maplibregl.Map | null = null;
   private mapLoaded = false;
+  private destroyed = false;
   private searchMarker: maplibregl.Marker | null = null;
   private hasFitted = false;
   private lastViewKey: string | null = null;
@@ -65,7 +80,12 @@ export class StationMapComponent implements OnDestroy {
   private collection: StationFeatureCollection = { type: 'FeatureCollection', features: [] };
 
   constructor() {
-    afterNextRender(() => this.initMap());
+    afterNextRender(async () => {
+      await loadMapStylesheet();
+      if (!this.destroyed) {
+        this.initMap();
+      }
+    });
 
     effect(() => {
       const stations = this.stations();
@@ -93,6 +113,7 @@ export class StationMapComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.searchMarker?.remove();
     this.searchMarker = null;
     this.map?.remove();

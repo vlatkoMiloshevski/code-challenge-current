@@ -14,9 +14,14 @@
   margin: 0;
 }
 
-app-station-map {
+app-station-map,
+.map-placeholder {
   position: absolute;
   inset: 0;
+}
+
+.map-placeholder {
+  background: var(--ion-color-light);
 }
 
 .filter-overlay {

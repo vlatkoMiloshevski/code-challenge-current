@@ -2,6 +2,7 @@
   <span class="favorites-label" id="favorites-label">Favorites</span>
   <ion-toggle
     size="small"
+    aria-label="Favorites"
     aria-labelledby="favorites-label"
     [checked]="favoritesView()"
     (ionChange)="onFavoritesSwitch($event.detail.checked)"

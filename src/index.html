@@ -8,13 +8,18 @@
 
     <meta name="color-scheme" content="light dark" />
     <meta
-      name="viewport"
-      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      name="description"
+      content="Find electric vehicle charging stations on a map, filter them by status and connector, and save favorites."
     />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="msapplication-tap-highlight" content="no" />
 
-    <link rel="icon" type="image/png" href="assets/icons/electric-car.png" />
+    <!-- Opens the connections early: the station list, the map style and its tiles are all remote. -->
+    <link rel="preconnect" href="https://dummyjson.com" />
+    <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
+
+    <link rel="icon" type="image/png" href="assets/icons/electric-car-64.png" />
 
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />

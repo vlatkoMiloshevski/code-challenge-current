@@ -21,6 +21,8 @@
     <p>No charging stations found.</p>
   </div>
   } @else {
+  <!-- The map library is large, so its code loads after the page is idle. The header and filters show first. -->
+  @defer (on idle) {
   <app-station-map
     [stations]="visibleStations()"
     [viewKey]="favoritesView() ? 'favorites' : 'all'"
@@ -29,6 +31,9 @@
     (locationFound)="onLocationFound()"
     (locationError)="onLocationError($event)"
   ></app-station-map>
+  } @placeholder {
+  <div class="map-placeholder" aria-hidden="true"></div>
+  }
 
   <div
     class="filter-overlay"
@@ -72,6 +77,7 @@
 
 @if (!isDesktop()) {
 <ion-modal
+  aria-label="Station details"
   [isOpen]="selectedStation() !== null"
   [breakpoints]="[0, 0.5, 1]"
   [initialBreakpoint]="0.5"
