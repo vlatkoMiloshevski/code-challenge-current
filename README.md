@@ -2,6 +2,8 @@
 
 An Ionic + Angular web app that shows EV charging stations on a map. Users can see station and connector details, filter stations, search for an address, show their own location, and save favorite stations and connectors.
 
+The project uses GitHub Actions for lint, build, unit and e2e tests: [GitHub Actions](https://github.com/vlatkoMiloshevski/code-challenge-current/actions).
+
 The app runs in the browser and is responsive: on desktop the station details open in a side panel, on mobile they open in a bottom sheet (`ion-modal`).
 
 ## Requirements
