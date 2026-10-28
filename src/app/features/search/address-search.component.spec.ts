@@ -93,6 +93,7 @@ describe('AddressSearchComponent', () => {
     component['select']({ label: 'Karl Johans gate, Oslo, Norway', latitude: 59.9, longitude: 10.7 });
 
     expect(changes).toEqual(['Karl Johans gate, Oslo, Norway']);
+    expect(component['query']()).toBe('Karl Johans gate, Oslo, Norway');
   });
 
   it('searches immediately on Enter and does not search again after the delay', () => {

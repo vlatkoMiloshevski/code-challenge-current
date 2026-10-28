@@ -63,6 +63,7 @@ export class AddressSearchComponent implements OnInit {
   }
 
   protected select(result: GeocodeResult): void {
+    this.query.set(result.label);
     this.resultSelected.emit(result);
     this.searchChanged.emit(result.label);
     this.results.set(null);
