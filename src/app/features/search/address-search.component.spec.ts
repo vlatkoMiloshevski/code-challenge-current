@@ -56,6 +56,16 @@ describe('AddressSearchComponent', () => {
     expectSearchRequest().flush([]);
   });
 
+  it('shows the query from the URL without searching or opening the results', () => {
+    const second = TestBed.createComponent(AddressSearchComponent);
+    second.componentRef.setInput('initialQuery', 'Karl Johans gate, Oslo, Norway');
+    second.detectChanges();
+
+    expect(second.componentInstance['query']()).toBe('Karl Johans gate, Oslo, Norway');
+    expect(second.componentInstance['results']()).toBeNull();
+    expectNoSearchRequest();
+  });
+
   it('does not search for queries shorter than the minimum length', () => {
     component['onInput']('ab');
 
@@ -64,7 +74,7 @@ describe('AddressSearchComponent', () => {
     expectNoSearchRequest();
   });
 
-  it('emits the trimmed query as searchChanged when the search runs', () => {
+  it('does not emit searchChanged while the user types', () => {
     const changes: string[] = [];
     component.searchChanged.subscribe((text) => changes.push(text));
 
@@ -72,7 +82,17 @@ describe('AddressSearchComponent', () => {
     advance(GEOCODING.searchDelayMs);
     expectSearchRequest().flush([]);
 
-    expect(changes).toEqual(['Oslo']);
+    expect(changes).toEqual([]);
+  });
+
+  it('emits the full label of the selected result as searchChanged', () => {
+    const changes: string[] = [];
+    component.searchChanged.subscribe((text) => changes.push(text));
+
+    component['onInput']('Karl');
+    component['select']({ label: 'Karl Johans gate, Oslo, Norway', latitude: 59.9, longitude: 10.7 });
+
+    expect(changes).toEqual(['Karl Johans gate, Oslo, Norway']);
   });
 
   it('searches immediately on Enter and does not search again after the delay', () => {

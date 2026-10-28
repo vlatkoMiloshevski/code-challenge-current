@@ -145,6 +145,8 @@ export class StationMapComponent implements OnDestroy {
       this.addStationLayers(map);
       this.mapLoaded = true;
       this.pushData();
+      // A focus point that arrived before the map loaded is shown now, after the initial fit to the stations.
+      this.showFocusPoint(this.focusPoint());
     });
 
     map.on('click', CLUSTER_LAYER, (event: maplibregl.MapLayerMouseEvent) => this.expandCluster(event));

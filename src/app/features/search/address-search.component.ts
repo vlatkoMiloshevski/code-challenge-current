@@ -40,11 +40,8 @@ export class AddressSearchComponent implements OnInit {
   protected readonly errorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
-    const text = this.initialQuery().trim();
-    this.query.set(text);
-    if (text.length >= GEOCODING.minQueryLength) {
-      this.run(text);
-    }
+    // The text from the URL is shown, but no search runs until the user types again.
+    this.query.set(this.initialQuery().trim());
   }
 
   protected onInput(value: string | null | undefined): void {
@@ -67,6 +64,7 @@ export class AddressSearchComponent implements OnInit {
 
   protected select(result: GeocodeResult): void {
     this.resultSelected.emit(result);
+    this.searchChanged.emit(result.label);
     this.results.set(null);
   }
 
@@ -81,7 +79,6 @@ export class AddressSearchComponent implements OnInit {
   }
 
   private search(text: string): void {
-    this.searchChanged.emit(text);
     this.run(text);
   }
 
