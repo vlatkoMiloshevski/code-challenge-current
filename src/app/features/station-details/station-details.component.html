@@ -52,7 +52,8 @@
   </ion-item>
 
   <ion-item class="point-item">
-    <ion-label>Charging station type: {{ station().type }} </ion-label>
+    <ion-label>Charging station type</ion-label>
+    <ion-note slot="end" class="type-value">{{ station().type }}</ion-note>
   </ion-item>
 
   @if (loading()) {
