@@ -1,0 +1,17 @@
+{
+  "name": "CURRENT",
+  "short_name": "CURRENT",
+  "description": "Find electric vehicle charging stations on a map, filter them by status and connector, and save favorites.",
+  "start_url": "/home",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0054e9",
+  "icons": [
+    {
+      "src": "assets/icons/electric-car-64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
+}

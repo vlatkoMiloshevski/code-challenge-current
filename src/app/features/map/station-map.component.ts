@@ -16,6 +16,20 @@ import { StationFeatureCollection, stationsBounds, stationsToFeatureCollection }
 
 export const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const MAP_WORKER_URL = '/assets/maplibre/maplibre-gl-worker.mjs';
+const MAP_STYLESHEET_URL = '/assets/maplibre/maplibre-gl.css';
+
+// The map stylesheet is about 80 KB. It is loaded with the map, not in the global styles, so the page does not wait for it.
+// A failed load resolves too: the map still works, only the controls are unstyled.
+function loadMapStylesheet(): Promise<void> {
+  return new Promise((resolve) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = MAP_STYLESHEET_URL;
+    link.onload = () => resolve();
+    link.onerror = () => resolve();
+    document.head.appendChild(link);
+  });
+}
 const STATIONS_SOURCE = 'stations';
 const CLUSTER_LAYER = 'clusters';
 const CLUSTER_COUNT_LAYER = 'cluster-count';
@@ -58,14 +72,21 @@ export class StationMapComponent implements OnDestroy {
   private readonly container = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map: maplibregl.Map | null = null;
   private mapLoaded = false;
+  private destroyed = false;
   private searchMarker: maplibregl.Marker | null = null;
+  private namePopup: maplibregl.Popup | null = null;
   private hasFitted = false;
   private lastViewKey: string | null = null;
   private viewBeforeFocus: { center: maplibregl.LngLat; zoom: number } | null = null;
   private collection: StationFeatureCollection = { type: 'FeatureCollection', features: [] };
 
   constructor() {
-    afterNextRender(() => this.initMap());
+    afterNextRender(async () => {
+      await loadMapStylesheet();
+      if (!this.destroyed) {
+        this.initMap();
+      }
+    });
 
     effect(() => {
       const stations = this.stations();
@@ -93,8 +114,10 @@ export class StationMapComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.searchMarker?.remove();
     this.searchMarker = null;
+    this.hideStationName();
     this.map?.remove();
     this.map = null;
   }
@@ -124,6 +147,8 @@ export class StationMapComponent implements OnDestroy {
       this.addStationLayers(map);
       this.mapLoaded = true;
       this.pushData();
+      // A focus point that arrived before the map loaded is shown now, after the initial fit to the stations.
+      this.showFocusPoint(this.focusPoint());
     });
 
     map.on('click', CLUSTER_LAYER, (event: maplibregl.MapLayerMouseEvent) => this.expandCluster(event));
@@ -132,6 +157,8 @@ export class StationMapComponent implements OnDestroy {
       map.on('mouseenter', layer, () => (map.getCanvas().style.cursor = 'pointer'));
       map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''));
     }
+    map.on('mouseenter', POINT_LAYER, (event: maplibregl.MapLayerMouseEvent) => this.showStationName(map, event));
+    map.on('mouseleave', POINT_LAYER, () => this.hideStationName());
   }
 
   private addStationLayers(map: maplibregl.Map): void {
@@ -154,15 +181,15 @@ export class StationMapComponent implements OnDestroy {
           ['get', 'point_count'],
           '#3880ff',
           10,
-          '#2dd36f',
-          50,
-          '#ffc409',
-          200,
           '#d79118',
+          40,
+          '#8fca0f',
+          200,
+          '#2dd36f',
           1000,
           '#bb5fb5',
         ],
-        'circle-radius': ['step', ['get', 'point_count'], 16, 10, 18, 50, 20, 200, 22, 1000, 24],
+        'circle-radius': ['step', ['get', 'point_count'], 16, 10, 18, 40, 20, 200, 22, 1000, 24],
         'circle-stroke-width': 2,
         'circle-stroke-color': '#ffffff',
       },
@@ -251,6 +278,29 @@ export class StationMapComponent implements OnDestroy {
     const clusterId = feature.properties['cluster_id'] as number;
     const zoom = await source?.getClusterExpansionZoom(clusterId);
     map.easeTo({ center: feature.geometry.coordinates as [number, number], zoom });
+  }
+
+  // The name is set as text, not HTML, so a station name cannot inject markup.
+  private showStationName(map: maplibregl.Map, event: maplibregl.MapLayerMouseEvent): void {
+    const feature = event.features?.[0];
+    if (!feature || feature.geometry.type !== 'Point') {
+      return;
+    }
+    this.namePopup ??= new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      offset: 14,
+      className: 'station-name-popup',
+    });
+    this.namePopup
+      .setLngLat(feature.geometry.coordinates as [number, number])
+      .setText(String(feature.properties['name']))
+      .addTo(map);
+  }
+
+  private hideStationName(): void {
+    this.namePopup?.remove();
+    this.namePopup = null;
   }
 
   private selectStation(event: maplibregl.MapLayerMouseEvent): void {

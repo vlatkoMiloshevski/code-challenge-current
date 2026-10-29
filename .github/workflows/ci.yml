@@ -72,3 +72,22 @@ jobs:
           name: playwright-report
           path: e2e/.playwright-output/
           retention-days: 7
+
+  # Deploys only the build that passed every check, and only from master.
+  deploy:
+    needs: [build, unit, e2e]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # firebase.json serves the "dist" folder, so the build output is restored there.
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CODE_CHALLENGE_STATION_MAP }}
+          projectId: code-challenge-station-map
+          channelId: live

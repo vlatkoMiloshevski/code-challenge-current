@@ -78,6 +78,29 @@ describe('StationApiService', () => {
       http.expectOne(STATION_API.stationsUrl).flush({ Result: null });
       expect(error()?.message).toBe('Station list response has an unexpected shape.');
     });
+
+    it('reuses the list response on later calls', () => {
+      service.getStations().subscribe();
+      http.expectOne(STATION_API.stationsUrl).flush({ Result: [makeStationDto()] });
+
+      let result: Station[] | undefined;
+      service.getStations().subscribe((stations) => (result = stations));
+
+      http.expectNone(STATION_API.stationsUrl);
+      expect(result).toHaveLength(1);
+    });
+
+    it('requests the list again after a failed attempt', () => {
+      const error = captureError(service.getStations());
+      http.expectOne(STATION_API.stationsUrl).error(new ProgressEvent('error'), { status: 0, statusText: '' });
+      expect(error()).toBeDefined();
+
+      let result: Station[] | undefined;
+      service.getStations().subscribe((stations) => (result = stations));
+      http.expectOne(STATION_API.stationsUrl).flush({ Result: [makeStationDto()] });
+
+      expect(result).toHaveLength(1);
+    });
   });
 });
 

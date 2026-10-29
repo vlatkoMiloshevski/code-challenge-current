@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject, NEVER, Observable, of, throwError } from 'rxjs';
 
 import { Station } from '../core/models/station.model';
+import { GeocodeResult, GeocodingService } from '../core/services/geocoding.service';
 import { StationApiService } from '../core/services/station-api.service';
 import { HomePage } from './home.page';
 import { makeStation } from '../../testing/fixtures';
@@ -267,6 +268,38 @@ describe('HomePage', () => {
 
       expect(fixture.nativeElement.querySelector('aside.side-panel')).toBeNull();
       expect(fixture.nativeElement.querySelector('ion-modal')).not.toBeNull();
+    });
+  });
+
+  describe('address in the URL', () => {
+    function createPageWithGeocoder(query: Record<string, string>, results: GeocodeResult[]) {
+      const geocoding = { search: jest.fn(() => of(results)) };
+      TestBed.configureTestingModule({ providers: [{ provide: GeocodingService, useValue: geocoding }] });
+      createPage(query);
+      return geocoding;
+    }
+
+    it('places the marker on the address from the URL', () => {
+      const address = { label: 'Karl Johans gate, Oslo, Norway', latitude: 59.91, longitude: 10.73 };
+      const geocoding = createPageWithGeocoder({ q: address.label }, [address]);
+
+      expect(geocoding.search).toHaveBeenCalledWith(address.label);
+      expect(page['focusPoint']()).toEqual(address);
+    });
+
+    it('prefers the result whose label matches the URL', () => {
+      const other = { label: 'Karl Johans gate, Bergen, Norway', latitude: 60.39, longitude: 5.32 };
+      const match = { label: 'Karl Johans gate, Oslo, Norway', latitude: 59.91, longitude: 10.73 };
+      createPageWithGeocoder({ q: match.label }, [other, match]);
+
+      expect(page['focusPoint']()).toEqual(match);
+    });
+
+    it('does not look up a query shorter than the minimum length', () => {
+      const geocoding = createPageWithGeocoder({ q: 'ab' }, []);
+
+      expect(geocoding.search).not.toHaveBeenCalled();
+      expect(page['focusPoint']()).toBeNull();
     });
   });
 

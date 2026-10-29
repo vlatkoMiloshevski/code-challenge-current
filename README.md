@@ -116,6 +116,7 @@ These numbers come from a software-rendered headless browser, so on a real devic
 - **Location** requires a secure context (HTTPS or `localhost`). Browsers block geolocation otherwise.
 - **Address search** uses the public Nominatim instance, which has a rate limit. A production app should use its own Nominatim instance or a commercial geocoder.
 - **Station details** come from a mock endpoint that returns the same data for every station. Only the charge points, pricing and contact information differ from the list data.
+- **Production data is a static copy.** The hosted site reads `src/assets/data/*.json`, so it does not show changes made to the dummyjson responses until the copies are refreshed (see [Data in production](#data-in-production)).
 - **Favorites** are stored only in the current browser. They are not synchronized between devices.
 - **Status values:** the app accepts only the statuses it knows (`Available`, `Preparing`, and the station types listed in the code). Other values stop the data from loading and show an error.
 
@@ -164,3 +165,47 @@ npx ng serve --configuration production
 Then open `http://localhost:4200/`. This uses the production configuration (optimized build, no source maps, synthetic-station helper removed). It is still the Angular dev server, not a static host.
 
 The output is written to `dist/`. The MapLibre web worker is copied to `assets/maplibre/` and the star and close icons to `assets/icons/` (see `angular.json`).
+
+## Deployment (Firebase Hosting)
+
+The production site is hosted on Firebase Hosting:
+
+- **URL:** https://code-challenge-station-map.web.app
+- **Firebase project:** `code-challenge-station-map` (set as the default in `.firebaserc`)
+- **Hosting config:** `firebase.json` serves the `dist/` folder and rewrites every path to `/index.html`, so the client-side routes (for example `/home`) work when opened directly.
+
+### Data in production
+
+The hosted site cannot call the dummyjson API directly, because dummyjson allows CORS only from `http://localhost:4200`. The environment files choose the data source per build:
+
+| Build | Station data |
+| --- | --- |
+| Development (`src/environments/environment.ts`) | Live dummyjson endpoints |
+| Production (`src/environments/environment.prod.ts`) | Static copies in `src/assets/data/stations.json` and `src/assets/data/station-detail.json` |
+
+To refresh the static copies, download the responses again and rebuild:
+
+```bash
+curl -sSf https://dummyjson.com/c/a8f2-a16e-4e37-a9d6 -o src/assets/data/stations.json
+curl -sSf https://dummyjson.com/c/dc70-4ec5-44d3-9b41 -o src/assets/data/station-detail.json
+```
+
+### Manual deploy
+
+Requires the Firebase CLI (already available through `npx`) and a logged-in account with access to the project:
+
+```bash
+npx firebase login
+npm run build
+npx firebase deploy --only hosting --project code-challenge-station-map
+```
+
+The `dist/` folder is the only thing uploaded. Firebase keeps a local cache in `.firebase/`, which is ignored by Git.
+
+### Automatic deploy (GitHub Actions)
+
+The `deploy` job in `.github/workflows/ci.yml` runs only on a push to `master` and only after the `build`, `unit` and `e2e` jobs pass. It uses the `FIREBASE_SERVICE_ACCOUNT_CODE_CHALLENGE_STATION_MAP` repository secret and publishes to the `live` channel of Firebase Hosting.
+
+### PWA
+
+The app is a Progressive Web App. The Angular service worker (`ngsw-config.json`) is enabled in production builds only. It caches the app shell, the static assets and the static station data, so the app opens offline after the first visit. The web manifest is in `src/assets/manifest.webmanifest`.

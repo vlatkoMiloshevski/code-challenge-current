@@ -1,11 +1,12 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { IonButton, IonContent, IonHeader, IonModal, IonSpinner, IonText, IonTitle, IonToolbar } from '@ionic/angular';
 
 import { StationApiService } from '../core/services/station-api.service';
 import { Station } from '../core/models/station.model';
-import { GeocodeResult } from '../core/services/geocoding.service';
+import { GEOCODING } from '../core/config/geocoding.config';
+import { GeocodeResult, GeocodingService } from '../core/services/geocoding.service';
 import { syntheticStationsFor } from '../core/dev/synthetic-stations';
 import { mediaQuery } from '../core/utils/media-query';
 import { StationMapComponent } from '../features/map/station-map.component';
@@ -53,6 +54,7 @@ const DESKTOP_QUERY = '(min-width: 768px)';
 })
 export class HomePage {
   private readonly stationApi = inject(StationApiService);
+  private readonly geocoding = inject(GeocodingService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -92,6 +94,12 @@ export class HomePage {
 
   constructor() {
     this.load();
+
+    // An address in the URL places the marker on the map; the search list stays closed.
+    effect(() => {
+      const query = this.searchText();
+      untracked(() => this.resolveFocusPoint(query));
+    });
 
     const stored = loadStationFilters();
     if (!hasFilterParams(this.route.snapshot.queryParamMap) && hasActiveFilters(stored)) {
@@ -155,6 +163,29 @@ export class HomePage {
 
   protected onAddressSelected(result: GeocodeResult): void {
     this.focusPoint.set(result);
+  }
+
+  private resolveFocusPoint(query: string): void {
+    if (query.length < GEOCODING.minQueryLength || this.focusPoint()?.label === query) {
+      return;
+    }
+    this.geocoding
+      .search(query)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (results) => {
+          // Ignore the answer when the URL has changed since the request started.
+          if (this.searchText() !== query) {
+            return;
+          }
+          const match = results.find((result) => result.label === query) ?? results[0];
+          if (match) {
+            this.focusPoint.set(match);
+          }
+        },
+        // Without a result the page still works; only the marker is missing.
+        error: () => undefined,
+      });
   }
 
   protected onLocationError(message: string): void {
