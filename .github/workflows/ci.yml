@@ -76,7 +76,7 @@ jobs:
   # Deploys only the build that passed every check, and only from master.
   deploy:
     needs: [build, unit, e2e]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

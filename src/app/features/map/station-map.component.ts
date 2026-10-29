@@ -74,6 +74,7 @@ export class StationMapComponent implements OnDestroy {
   private mapLoaded = false;
   private destroyed = false;
   private searchMarker: maplibregl.Marker | null = null;
+  private namePopup: maplibregl.Popup | null = null;
   private hasFitted = false;
   private lastViewKey: string | null = null;
   private viewBeforeFocus: { center: maplibregl.LngLat; zoom: number } | null = null;
@@ -116,6 +117,7 @@ export class StationMapComponent implements OnDestroy {
     this.destroyed = true;
     this.searchMarker?.remove();
     this.searchMarker = null;
+    this.hideStationName();
     this.map?.remove();
     this.map = null;
   }
@@ -155,6 +157,8 @@ export class StationMapComponent implements OnDestroy {
       map.on('mouseenter', layer, () => (map.getCanvas().style.cursor = 'pointer'));
       map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''));
     }
+    map.on('mouseenter', POINT_LAYER, (event: maplibregl.MapLayerMouseEvent) => this.showStationName(map, event));
+    map.on('mouseleave', POINT_LAYER, () => this.hideStationName());
   }
 
   private addStationLayers(map: maplibregl.Map): void {
@@ -274,6 +278,29 @@ export class StationMapComponent implements OnDestroy {
     const clusterId = feature.properties['cluster_id'] as number;
     const zoom = await source?.getClusterExpansionZoom(clusterId);
     map.easeTo({ center: feature.geometry.coordinates as [number, number], zoom });
+  }
+
+  // The name is set as text, not HTML, so a station name cannot inject markup.
+  private showStationName(map: maplibregl.Map, event: maplibregl.MapLayerMouseEvent): void {
+    const feature = event.features?.[0];
+    if (!feature || feature.geometry.type !== 'Point') {
+      return;
+    }
+    this.namePopup ??= new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      offset: 14,
+      className: 'station-name-popup',
+    });
+    this.namePopup
+      .setLngLat(feature.geometry.coordinates as [number, number])
+      .setText(String(feature.properties['name']))
+      .addTo(map);
+  }
+
+  private hideStationName(): void {
+    this.namePopup?.remove();
+    this.namePopup = null;
   }
 
   private selectStation(event: maplibregl.MapLayerMouseEvent): void {
