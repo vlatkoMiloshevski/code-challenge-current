@@ -34,6 +34,7 @@ const STATIONS_SOURCE = 'stations';
 const CLUSTER_LAYER = 'clusters';
 const CLUSTER_COUNT_LAYER = 'cluster-count';
 const POINT_LAYER = 'station-points';
+const POINT_NAME_LAYER = 'station-names';
 const INITIAL_CENTER: [number, number] = [10.75, 59.92];
 const FOCUS_ZOOM = 15;
 const VIEW_TRANSITION_MS = 800;
@@ -64,7 +65,6 @@ export function describeLocationError(error: { code: number } | undefined): stri
 export class StationMapComponent implements OnDestroy {
   readonly stations = input.required<readonly Station[]>();
   readonly focusPoint = input<MapPoint | null>(null);
-  readonly selectedStationId = input<number | null>(null);
   readonly viewKey = input('');
   readonly stationSelected = output<Station>();
   readonly locationFound = output<void>();
@@ -75,7 +75,6 @@ export class StationMapComponent implements OnDestroy {
   private mapLoaded = false;
   private destroyed = false;
   private searchMarker: maplibregl.Marker | null = null;
-  private namePopup: maplibregl.Popup | null = null;
   private hasFitted = false;
   private lastViewKey: string | null = null;
   private viewBeforeFocus: { center: maplibregl.LngLat; zoom: number } | null = null;
@@ -99,12 +98,6 @@ export class StationMapComponent implements OnDestroy {
       this.showFocusPoint(this.focusPoint());
     });
 
-    // Any change of the open station (opened, switched or closed) removes the name popup.
-    effect(() => {
-      this.selectedStationId();
-      untracked(() => this.hideStationName());
-    });
-
     effect(() => {
       const key = this.viewKey();
       untracked(() => {
@@ -124,7 +117,6 @@ export class StationMapComponent implements OnDestroy {
     this.destroyed = true;
     this.searchMarker?.remove();
     this.searchMarker = null;
-    this.hideStationName();
     this.map?.remove();
     this.map = null;
   }
@@ -164,8 +156,6 @@ export class StationMapComponent implements OnDestroy {
       map.on('mouseenter', layer, () => (map.getCanvas().style.cursor = 'pointer'));
       map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''));
     }
-    map.on('mouseenter', POINT_LAYER, (event: maplibregl.MapLayerMouseEvent) => this.showStationName(map, event));
-    map.on('mouseleave', POINT_LAYER, () => this.hideStationName());
   }
 
   private addStationLayers(map: maplibregl.Map): void {
@@ -228,6 +218,28 @@ export class StationMapComponent implements OnDestroy {
         'circle-stroke-color': '#ffffff',
       },
     });
+
+    map.addLayer({
+      id: POINT_NAME_LAYER,
+      type: 'symbol',
+      source: STATIONS_SOURCE,
+      filter: ['!', ['has', 'point_count']],
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 12,
+        'text-anchor': 'bottom',
+        'text-offset': [0, -1.2],
+        'text-max-width': 10,
+        // The basemap labels are drawn below this layer and would otherwise hide every station name they touch.
+        'text-allow-overlap': true,
+      },
+      paint: {
+        'text-color': '#1f1f1f',
+        'text-halo-color': '#ffffff',
+        'text-halo-width': 1.5,
+      },
+    });
   }
 
   private pushData(): void {
@@ -285,29 +297,6 @@ export class StationMapComponent implements OnDestroy {
     const clusterId = feature.properties['cluster_id'] as number;
     const zoom = await source?.getClusterExpansionZoom(clusterId);
     map.easeTo({ center: feature.geometry.coordinates as [number, number], zoom });
-  }
-
-  // The name is set as text, not HTML, so a station name cannot inject markup.
-  private showStationName(map: maplibregl.Map, event: maplibregl.MapLayerMouseEvent): void {
-    const feature = event.features?.[0];
-    if (!feature || feature.geometry.type !== 'Point') {
-      return;
-    }
-    this.namePopup ??= new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      offset: 14,
-      className: 'station-name-popup',
-    });
-    this.namePopup
-      .setLngLat(feature.geometry.coordinates as [number, number])
-      .setText(String(feature.properties['name']))
-      .addTo(map);
-  }
-
-  private hideStationName(): void {
-    this.namePopup?.remove();
-    this.namePopup = null;
   }
 
   private selectStation(event: maplibregl.MapLayerMouseEvent): void {

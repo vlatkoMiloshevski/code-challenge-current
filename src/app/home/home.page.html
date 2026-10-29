@@ -27,7 +27,6 @@
     [stations]="visibleStations()"
     [viewKey]="favoritesView() ? 'favorites' : 'all'"
     [focusPoint]="focusPoint()"
-    [selectedStationId]="selectedStation()?.id ?? null"
     (stationSelected)="onStationSelected($event)"
     (locationFound)="onLocationFound()"
     (locationError)="onLocationError($event)"
