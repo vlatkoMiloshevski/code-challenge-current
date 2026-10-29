@@ -51,11 +51,11 @@ export function stationsBounds(stations: readonly Station[]): LngLatBounds | nul
   ];
 }
 
-// Stations closer than this share a marker position, so their markers are spread around it.
-const OVERLAP_METERS = 60;
-const SPREAD_RADIUS_METERS = 30;
+// Stations within this distance of every other station in their row are drawn side by side.
+const ROW_RADIUS_METERS = 60;
+const ROW_SPACING_METERS = 15;
 const METERS_PER_DEGREE_LAT = 111_320;
-// Grid cells this size are never smaller than OVERLAP_METERS at Norwegian latitudes, so a neighbour search of one cell is enough.
+// Grid cells of this size are at least ROW_RADIUS_METERS wide in Norway, so checking the neighbouring cells is enough.
 const CELL_DEGREES_LAT = 0.001;
 const CELL_DEGREES_LNG = 0.002;
 
@@ -69,10 +69,12 @@ function metersBetween(a: Station, b: Station): number {
   return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
 }
 
-// Returns one [longitude, latitude] per station. Stations without a close neighbour keep their real position.
-function markerPositions(stations: readonly Station[]): [number, number][] {
-  const positions = stations.map((station): [number, number] => [station.longitude, station.latitude]);
+function cellKey(row: number, column: number): string {
+  return `${row}:${column}`;
+}
 
+// A station joins a group only when it is close to every member, so a group never spans more than the row radius.
+function groupsOfNearbyStations(stations: readonly Station[]): number[][] {
   const cells = new Map<string, number[]>();
   stations.forEach((station, index) => {
     const key = cellKey(
@@ -82,29 +84,38 @@ function markerPositions(stations: readonly Station[]): [number, number][] {
     cells.set(key, [...(cells.get(key) ?? []), index]);
   });
 
-  const parent = stations.map((_, index) => index);
-  const find = (index: number): number => (parent[index] === index ? index : (parent[index] = find(parent[index])));
+  const groups: number[][] = [];
+  const groupOf: number[] = [];
   stations.forEach((station, index) => {
     const row = Math.floor(station.latitude / CELL_DEGREES_LAT);
     const column = Math.floor(station.longitude / CELL_DEGREES_LNG);
+    const candidates = new Set<number>();
     for (let dRow = -1; dRow <= 1; dRow++) {
       for (let dColumn = -1; dColumn <= 1; dColumn++) {
         for (const other of cells.get(cellKey(row + dRow, column + dColumn)) ?? []) {
-          if (other > index && metersBetween(station, stations[other]) <= OVERLAP_METERS) {
-            parent[find(other)] = find(index);
+          if (other < index) {
+            candidates.add(groupOf[other]);
           }
         }
       }
     }
+    const joined = [...candidates].find((group) =>
+      groups[group].every((member) => metersBetween(station, stations[member]) <= ROW_RADIUS_METERS),
+    );
+    if (joined === undefined) {
+      groupOf[index] = groups.push([index]) - 1;
+    } else {
+      groups[joined].push(index);
+      groupOf[index] = joined;
+    }
   });
+  return groups;
+}
 
-  const groups = new Map<number, number[]>();
-  stations.forEach((_, index) => {
-    const root = find(index);
-    groups.set(root, [...(groups.get(root) ?? []), index]);
-  });
-
-  for (const members of groups.values()) {
+// Returns one [longitude, latitude] per station. Stations that share a spot are laid out in a row around its centre.
+function markerPositions(stations: readonly Station[]): [number, number][] {
+  const positions = stations.map((station): [number, number] => [station.longitude, station.latitude]);
+  for (const members of groupsOfNearbyStations(stations)) {
     if (members.length < 2) {
       continue;
     }
@@ -112,18 +123,11 @@ function markerPositions(stations: readonly Station[]): [number, number][] {
     const centreLng = members.reduce((sum, index) => sum + stations[index].longitude, 0) / members.length;
     const metersPerDegreeLng = METERS_PER_DEGREE_LAT * Math.cos((centreLat * Math.PI) / 180);
     members.forEach((index, slot) => {
-      const angle = (2 * Math.PI * slot) / members.length;
-      positions[index] = [
-        centreLng + (SPREAD_RADIUS_METERS * Math.cos(angle)) / metersPerDegreeLng,
-        centreLat + (SPREAD_RADIUS_METERS * Math.sin(angle)) / METERS_PER_DEGREE_LAT,
-      ];
+      const eastMeters = (slot - (members.length - 1) / 2) * ROW_SPACING_METERS;
+      positions[index] = [centreLng + eastMeters / metersPerDegreeLng, centreLat];
     });
   }
   return positions;
-}
-
-function cellKey(row: number, column: number): string {
-  return `${row}:${column}`;
 }
 
 export function stationsToFeatureCollection(stations: readonly Station[]): StationFeatureCollection {
