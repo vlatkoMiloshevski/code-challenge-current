@@ -3,7 +3,7 @@ Feature: Home page
   Scenario: The page loads the stations and the filters
     Given the station service returns the sample stations
     When I open the home page
-    Then the page title is "CURRENT"
+    Then the page title is "EV Charging Stations"
     And the stations are loaded
 
   Scenario: The page shows an empty state when there are no stations
