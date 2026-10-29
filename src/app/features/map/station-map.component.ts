@@ -64,6 +64,7 @@ export function describeLocationError(error: { code: number } | undefined): stri
 export class StationMapComponent implements OnDestroy {
   readonly stations = input.required<readonly Station[]>();
   readonly focusPoint = input<MapPoint | null>(null);
+  readonly selectedStationId = input<number | null>(null);
   readonly viewKey = input('');
   readonly stationSelected = output<Station>();
   readonly locationFound = output<void>();
@@ -96,6 +97,12 @@ export class StationMapComponent implements OnDestroy {
 
     effect(() => {
       this.showFocusPoint(this.focusPoint());
+    });
+
+    // Any change of the open station (opened, switched or closed) removes the name popup.
+    effect(() => {
+      this.selectedStationId();
+      untracked(() => this.hideStationName());
     });
 
     effect(() => {
