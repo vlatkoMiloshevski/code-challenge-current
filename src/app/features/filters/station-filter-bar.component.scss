@@ -3,10 +3,22 @@
   color: var(--ion-color-medium);
 }
 
+.favorites-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 4px 8px;
+}
+
+.favorites-label {
+  margin-left: 4px;
+  font-size: 15px;
+}
+
 .filters-header {
-  margin-top: 8px;
-  padding: 8px 8px 8px;
-  border-top: 1px solid var(--ion-border-color, rgba(128, 128, 128, 0.3));
+  padding-top: 4px;
+  border-top: 1px solid var(--ion-border-color, rgba(128, 128, 128, 0.2));
 }
 
 .section-toggle {
@@ -15,15 +27,20 @@
   gap: 8px;
   width: 100%;
   margin: 0;
-  padding: 4px 8px;
+  padding: 6px 8px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
-  color: inherit;
+  color: var(--ion-text-color);
   font: inherit;
   font-size: 15px;
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
+}
+
+.section-toggle:hover {
+  color: var(--ion-color-primary);
 }
 
 .section-toggle:focus-visible {
@@ -31,20 +48,27 @@
   outline-offset: 2px;
 }
 
+.section-toggle [aria-label] {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--ion-color-primary-contrast, #fff);
+  background: var(--ion-color-primary, #0054e9);
+}
+
 .section-toggle ion-icon {
   margin-left: auto;
   font-size: 18px;
 }
 
+// The groups stay in the DOM and are only hidden, so the arrow does not re-create them.
 .filter-groups {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 8px 24px;
-  padding: 4px 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px 16px;
+  padding: 8px 8px 4px;
 }
 
-// The groups stay in the DOM and are only hidden, so the arrow does not re-create them.
 .filter-groups[hidden] {
   display: none;
 }
@@ -57,37 +81,26 @@
 
 .group-caption {
   margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--ion-color-medium);
-  font-size: 12px;
 }
 
 ion-checkbox {
   font-size: 14px;
-  --border-radius: 0;
-}
-
-.favorites-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 8px 16px 0;
-  border-top: 1px solid var(--ion-border-color, rgba(128, 128, 128, 0.3));
+  --border-radius: 4px;
 }
 
 .clear-filters {
+  grid-column: 1 / -1;
   display: flex;
-  flex: 0 0 100%;
   justify-content: flex-end;
 }
 
 .clear-filters ion-button::part(native) {
   font-size: 12px;
-}
-
-.favorites-label {
-  font-size: 15px;
 }
 
 ion-toggle {
@@ -104,19 +117,4 @@ ion-toggle::part(track) {
   width: 40px;
   height: 20px;
   border-radius: 13px;
-}
-
-ion-chip {
-  flex: 0 0 auto;
-  margin: 0;
-  height: 24px;
-  min-height: 24px;
-  padding-top: 0;
-  padding-bottom: 0;
-  border-radius: 6px;
-}
-
-ion-chip:hover,
-ion-chip:active {
-  filter: brightness(0.8);
 }

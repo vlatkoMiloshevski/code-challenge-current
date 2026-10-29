@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IonItem, IonLabel, IonList, IonSearchbar, IonSpinner, IonText } from '@ionic/angular';
 import { Subject, Subscription, debounceTime, filter } from 'rxjs';
@@ -38,6 +38,7 @@ export class AddressSearchComponent implements OnInit {
   protected readonly searching = signal(false);
   protected readonly results = signal<GeocodeResult[] | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly open = computed(() => this.searching() || this.errorMessage() !== null || this.results() !== null);
 
   ngOnInit(): void {
     // The text from the URL is shown, but no search runs until the user types again.

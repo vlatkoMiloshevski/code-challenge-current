@@ -1,17 +1,36 @@
+:host {
+  position: relative;
+  display: block;
+}
+
 ion-searchbar {
+  --background: var(--ion-color-step-50, #f4f5f8);
+  --border-radius: 10px;
+  --box-shadow: none;
+  --icon-color: var(--ion-color-medium);
+  padding: 0;
   font-size: 15px;
 }
 
-:host ::ng-deep ion-searchbar .searchbar-input {
-  font-size: 15px;
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--ion-background-color, #fff);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .status {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 4px 12px 8px;
-  font-size: 14px;
+  margin: 10px 12px;
+  font-size: 13px;
+  color: var(--ion-color-medium);
 }
 
 .status p,
@@ -24,4 +43,11 @@ p.status {
   overflow-y: auto;
   margin: 0;
   padding: 0;
+}
+
+ion-item {
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  --min-height: 40px;
+  font-size: 14px;
 }

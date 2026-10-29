@@ -69,7 +69,7 @@
     } }
   </div>
   } } } @if (isDesktop() && selectedStation(); as station) {
-  <aside class="side-panel">
+  <aside class="side-panel" animate.enter="slide-in" animate.leave="slide-out">
     <app-station-details [station]="station" [showClose]="true" (closed)="closeDetails()"></app-station-details>
   </aside>
   }
