@@ -40,6 +40,19 @@
     <span>{{ station().power.minKwh }}–{{ station().power.maxKwh }} kWh</span>
   </div>
 
+  <ion-button
+    class="navigate"
+    expand="block"
+    fill="outline"
+    size="small"
+    [href]="navigateHref(station())"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <ion-icon slot="start" [src]="navigateIcon"></ion-icon>
+    Navigate
+  </ion-button>
+
   <ion-item class="point-item">
     <ion-label
       >Connectors:
