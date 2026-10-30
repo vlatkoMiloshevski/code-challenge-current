@@ -8,6 +8,8 @@ export interface StationFeatureProperties {
   status: MarkerStatus;
   availableBoxes: number;
   totalBoxes: number;
+  stackKey: string;
+  stack: number;
 }
 
 export interface StationFeature {
@@ -51,98 +53,30 @@ export function stationsBounds(stations: readonly Station[]): LngLatBounds | nul
   ];
 }
 
-// Stations within this distance of every other station in their row are drawn side by side.
-const ROW_RADIUS_METERS = 60;
-const ROW_SPACING_METERS = 15;
-const METERS_PER_DEGREE_LAT = 111_320;
-// Grid cells of this size are at least ROW_RADIUS_METERS wide in Norway, so checking the neighbouring cells is enough.
-const CELL_DEGREES_LAT = 0.001;
-const CELL_DEGREES_LNG = 0.002;
-
-function metersBetween(a: Station, b: Station): number {
-  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
-  const dLat = toRadians(b.latitude - a.latitude);
-  const dLng = toRadians(b.longitude - a.longitude);
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(a.latitude)) * Math.cos(toRadians(b.latitude)) * Math.sin(dLng / 2) ** 2;
-  return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
-}
-
-function cellKey(row: number, column: number): string {
-  return `${row}:${column}`;
-}
-
-// A station joins a group only when it is close to every member, so a group never spans more than the row radius.
-function groupsOfNearbyStations(stations: readonly Station[]): number[][] {
-  const cells = new Map<string, number[]>();
-  stations.forEach((station, index) => {
-    const key = cellKey(
-      Math.floor(station.latitude / CELL_DEGREES_LAT),
-      Math.floor(station.longitude / CELL_DEGREES_LNG),
-    );
-    cells.set(key, [...(cells.get(key) ?? []), index]);
-  });
-
-  const groups: number[][] = [];
-  const groupOf: number[] = [];
-  stations.forEach((station, index) => {
-    const row = Math.floor(station.latitude / CELL_DEGREES_LAT);
-    const column = Math.floor(station.longitude / CELL_DEGREES_LNG);
-    const candidates = new Set<number>();
-    for (let dRow = -1; dRow <= 1; dRow++) {
-      for (let dColumn = -1; dColumn <= 1; dColumn++) {
-        for (const other of cells.get(cellKey(row + dRow, column + dColumn)) ?? []) {
-          if (other < index) {
-            candidates.add(groupOf[other]);
-          }
-        }
-      }
-    }
-    const joined = [...candidates].find((group) =>
-      groups[group].every((member) => metersBetween(station, stations[member]) <= ROW_RADIUS_METERS),
-    );
-    if (joined === undefined) {
-      groupOf[index] = groups.push([index]) - 1;
-    } else {
-      groups[joined].push(index);
-      groupOf[index] = joined;
-    }
-  });
-  return groups;
-}
-
-// Returns one [longitude, latitude] per station. Stations that share a spot are laid out in a row around its centre.
-function markerPositions(stations: readonly Station[]): [number, number][] {
-  const positions = stations.map((station): [number, number] => [station.longitude, station.latitude]);
-  for (const members of groupsOfNearbyStations(stations)) {
-    if (members.length < 2) {
-      continue;
-    }
-    const centreLat = members.reduce((sum, index) => sum + stations[index].latitude, 0) / members.length;
-    const centreLng = members.reduce((sum, index) => sum + stations[index].longitude, 0) / members.length;
-    const metersPerDegreeLng = METERS_PER_DEGREE_LAT * Math.cos((centreLat * Math.PI) / 180);
-    members.forEach((index, slot) => {
-      const eastMeters = (slot - (members.length - 1) / 2) * ROW_SPACING_METERS;
-      positions[index] = [centreLng + eastMeters / metersPerDegreeLng, centreLat];
-    });
-  }
-  return positions;
+// Stations with the same coordinates share a stack key. They are drawn on top of each other.
+export function stackKey(station: Station): string {
+  return `${station.longitude},${station.latitude}`;
 }
 
 export function stationsToFeatureCollection(stations: readonly Station[]): StationFeatureCollection {
-  const positions = markerPositions(stations);
+  const stackSizes = new Map<string, number>();
+  for (const station of stations) {
+    const key = stackKey(station);
+    stackSizes.set(key, (stackSizes.get(key) ?? 0) + 1);
+  }
   return {
     type: 'FeatureCollection',
-    features: stations.map((station, index) => ({
+    features: stations.map((station) => ({
       type: 'Feature',
-      geometry: { type: 'Point', coordinates: positions[index] },
+      geometry: { type: 'Point', coordinates: [station.longitude, station.latitude] },
       properties: {
         id: station.id,
         name: station.name,
         status: markerStatus(station),
         availableBoxes: station.boxes.available,
         totalBoxes: station.boxes.total,
+        stackKey: stackKey(station),
+        stack: stackSizes.get(stackKey(station)) ?? 1,
       },
     })),
   };
