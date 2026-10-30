@@ -50,6 +50,7 @@ export class StationDetailsComponent {
   protected readonly starIcon = '/assets/icons/star.svg';
   protected readonly starOutlineIcon = '/assets/icons/star-outline.svg';
   protected readonly closeIcon = '/assets/icons/close.svg';
+  protected readonly navigateIcon = '/assets/icons/navigate.svg';
 
   readonly station = input.required<Station>();
   readonly showClose = input(false);
@@ -98,6 +99,11 @@ export class StationDetailsComponent {
 
   protected toggleChargePoint(chargePointId: number): void {
     this.favorites.toggleChargePoint(this.station().id, chargePointId);
+  }
+
+  // Google Maps starts from the device's own location when no origin is given.
+  protected navigateHref(station: Station): string {
+    return `https://www.google.com/maps/dir/?api=1&destination=${station.latitude},${station.longitude}&travelmode=driving`;
   }
 
   protected telHref(phone: string): string {

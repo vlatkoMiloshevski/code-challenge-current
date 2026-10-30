@@ -9,10 +9,17 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import type { Feature, Point } from 'geojson';
 import * as maplibregl from 'maplibre-gl';
 
 import { Station } from '../../core/models/station.model';
-import { StationFeatureCollection, stationsBounds, stationsToFeatureCollection } from './station-geojson';
+import {
+  markerStatus,
+  stackKey,
+  StationFeatureCollection,
+  stationsBounds,
+  stationsToFeatureCollection,
+} from './station-geojson';
 
 export const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const MAP_WORKER_URL = '/assets/maplibre/maplibre-gl-worker.mjs';
@@ -35,6 +42,15 @@ const CLUSTER_LAYER = 'clusters';
 const CLUSTER_COUNT_LAYER = 'cluster-count';
 const POINT_LAYER = 'station-points';
 const POINT_NAME_LAYER = 'station-names';
+const STACK_BADGE_LAYER = 'station-stack-badge';
+const STACK_COUNT_LAYER = 'station-stack-count';
+const SPIDER_SOURCE = 'spider';
+const SPIDER_LEG_LAYER = 'spider-legs';
+const SPIDER_POINT_LAYER = 'spider-points';
+const SPIDER_NAME_LAYER = 'spider-names';
+// Distance from the stack centre to the spread stations, in screen pixels.
+const SPIDER_RADIUS_PX = 40;
+type MapFilter = NonNullable<Parameters<maplibregl.Map['setFilter']>[1]>;
 const INITIAL_CENTER: [number, number] = [10.75, 59.92];
 const FOCUS_ZOOM = 15;
 const VIEW_TRANSITION_MS = 800;
@@ -79,6 +95,8 @@ export class StationMapComponent implements OnDestroy {
   private lastViewKey: string | null = null;
   private viewBeforeFocus: { center: maplibregl.LngLat; zoom: number } | null = null;
   private collection: StationFeatureCollection = { type: 'FeatureCollection', features: [] };
+  // The stack whose stations are spread out around it, or null when none is.
+  private spiderKey: string | null = null;
 
   constructor() {
     afterNextRender(async () => {
@@ -91,6 +109,7 @@ export class StationMapComponent implements OnDestroy {
     effect(() => {
       const stations = this.stations();
       this.collection = stationsToFeatureCollection(stations);
+      this.collapseSpider();
       this.pushData();
     });
 
@@ -150,9 +169,9 @@ export class StationMapComponent implements OnDestroy {
       this.showFocusPoint(this.focusPoint());
     });
 
-    map.on('click', CLUSTER_LAYER, (event: maplibregl.MapLayerMouseEvent) => this.expandCluster(event));
-    map.on('click', POINT_LAYER, (event: maplibregl.MapLayerMouseEvent) => this.selectStation(event));
-    for (const layer of [CLUSTER_LAYER, POINT_LAYER]) {
+    map.on('click', (event: maplibregl.MapMouseEvent) => this.handleClick(event));
+    map.on('zoomstart', () => this.collapseSpider());
+    for (const layer of [CLUSTER_LAYER, POINT_LAYER, SPIDER_POINT_LAYER]) {
       map.on('mouseenter', layer, () => (map.getCanvas().style.cursor = 'pointer'));
       map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''));
     }
@@ -240,6 +259,181 @@ export class StationMapComponent implements OnDestroy {
         'text-halo-width': 1.5,
       },
     });
+
+    // Stations on the same spot show one marker with a count badge, drawn at its top right.
+    map.addLayer({
+      id: STACK_BADGE_LAYER,
+      type: 'circle',
+      source: STATIONS_SOURCE,
+      filter: ['all', ['!', ['has', 'point_count']], ['>', ['get', 'stack'], 1]],
+      paint: {
+        'circle-color': '#1f1f1f',
+        'circle-radius': 7,
+        'circle-stroke-width': 1.5,
+        'circle-stroke-color': '#ffffff',
+        'circle-translate': [9, -9],
+      },
+    });
+
+    map.addLayer({
+      id: STACK_COUNT_LAYER,
+      type: 'symbol',
+      source: STATIONS_SOURCE,
+      filter: ['all', ['!', ['has', 'point_count']], ['>', ['get', 'stack'], 1]],
+      layout: {
+        'text-field': ['to-string', ['get', 'stack']],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 10,
+        'text-offset': [0.9, -0.9],
+        'text-allow-overlap': true,
+      },
+      paint: { 'text-color': '#ffffff' },
+    });
+
+    map.addSource(SPIDER_SOURCE, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+
+    map.addLayer({
+      id: SPIDER_LEG_LAYER,
+      type: 'line',
+      source: SPIDER_SOURCE,
+      filter: ['==', ['geometry-type'], 'LineString'],
+      paint: { 'line-color': '#1f1f1f', 'line-width': 1.5, 'line-opacity': 0.6 },
+    });
+
+    map.addLayer({
+      id: SPIDER_POINT_LAYER,
+      type: 'circle',
+      source: SPIDER_SOURCE,
+      filter: ['==', ['geometry-type'], 'Point'],
+      paint: {
+        'circle-color': ['match', ['get', 'status'], 'available', '#2dd36f', 'full', '#eb445a', '#8c8c8c'],
+        'circle-radius': 9,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff',
+      },
+    });
+
+    // Names sit on the outer side of each station, so neighbouring names do not run into each other.
+    map.addLayer({
+      id: SPIDER_NAME_LAYER,
+      type: 'symbol',
+      source: SPIDER_SOURCE,
+      filter: ['==', ['geometry-type'], 'Point'],
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 12,
+        'text-anchor': ['get', 'labelSide'],
+        'text-offset': [
+          'match',
+          ['get', 'labelSide'],
+          'left',
+          ['literal', [1, 0]],
+          'right',
+          ['literal', [-1, 0]],
+          'top',
+          ['literal', [0, 1.2]],
+          ['literal', [0, -1.2]],
+        ],
+        'text-max-width': 10,
+        'text-allow-overlap': true,
+      },
+      paint: {
+        'text-color': '#1f1f1f',
+        'text-halo-color': '#ffffff',
+        'text-halo-width': 1.5,
+      },
+    });
+  }
+
+  private handleClick(event: maplibregl.MapMouseEvent): void {
+    const hit = this.map?.queryRenderedFeatures(event.point, {
+      layers: [CLUSTER_LAYER, POINT_LAYER, SPIDER_POINT_LAYER, SPIDER_LEG_LAYER],
+    })[0];
+    if (!hit) {
+      this.collapseSpider();
+      return;
+    }
+    if (hit.layer.id === CLUSTER_LAYER) {
+      void this.expandCluster(hit);
+    } else if (hit.layer.id === POINT_LAYER && (hit.properties['stack'] as number) > 1) {
+      this.spiderfy(hit);
+    } else if (hit.layer.id !== SPIDER_LEG_LAYER) {
+      this.selectStation(hit.properties['id'] as number);
+    }
+  }
+
+  // Shows the stations of a stack in a ring around it. Their real coordinates do not change, so the ring is only visual.
+  private spiderfy(feature: maplibregl.MapGeoJSONFeature): void {
+    const map = this.map;
+    if (!map) {
+      return;
+    }
+    const key = feature.properties['stackKey'] as string;
+    const [lng, lat] = (feature.geometry as Point).coordinates;
+    const center = map.project([lng, lat]);
+    const members = this.stations()
+      .filter((station) => stackKey(station) === key)
+      .sort((a, b) => a.id - b.id);
+
+    const features: Feature[] = [];
+    members.forEach((station, slot) => {
+      const angle = (2 * Math.PI * slot) / members.length;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      const point = map.unproject([center.x + SPIDER_RADIUS_PX * cos, center.y + SPIDER_RADIUS_PX * sin]);
+      const labelSide = Math.abs(cos) >= Math.abs(sin) ? (cos > 0 ? 'left' : 'right') : sin > 0 ? 'top' : 'bottom';
+      features.push({
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [lng, lat],
+            [point.lng, point.lat],
+          ],
+        },
+        properties: {},
+      });
+      features.push({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [point.lng, point.lat] },
+        properties: { id: station.id, name: station.name, status: markerStatus(station), labelSide },
+      });
+    });
+
+    this.spiderKey = key;
+    map.getSource<maplibregl.GeoJSONSource>(SPIDER_SOURCE)?.setData({ type: 'FeatureCollection', features });
+    this.applyStackFilters();
+  }
+
+  private collapseSpider(): void {
+    if (this.spiderKey === null) {
+      return;
+    }
+    this.spiderKey = null;
+    this.map?.getSource<maplibregl.GeoJSONSource>(SPIDER_SOURCE)?.setData({ type: 'FeatureCollection', features: [] });
+    this.applyStackFilters();
+  }
+
+  // While a stack is spread out, its stacked markers are hidden so only the ring is shown.
+  private applyStackFilters(): void {
+    const map = this.map;
+    if (!map || !this.mapLoaded) {
+      return;
+    }
+    const hidden = this.spiderKey;
+    const single: MapFilter =
+      hidden === null
+        ? ['!', ['has', 'point_count']]
+        : ['all', ['!', ['has', 'point_count']], ['!=', ['get', 'stackKey'], hidden]];
+    const stacked: MapFilter =
+      hidden === null
+        ? ['all', ['!', ['has', 'point_count']], ['>', ['get', 'stack'], 1]]
+        : ['all', ['!', ['has', 'point_count']], ['>', ['get', 'stack'], 1], ['!=', ['get', 'stackKey'], hidden]];
+    map.setFilter(POINT_LAYER, single);
+    map.setFilter(POINT_NAME_LAYER, single);
+    map.setFilter(STACK_BADGE_LAYER, stacked);
+    map.setFilter(STACK_COUNT_LAYER, stacked);
   }
 
   private pushData(): void {
@@ -287,10 +481,9 @@ export class StationMapComponent implements OnDestroy {
     this.map.flyTo({ center, zoom: FOCUS_ZOOM });
   }
 
-  private async expandCluster(event: maplibregl.MapLayerMouseEvent): Promise<void> {
+  private async expandCluster(feature: maplibregl.MapGeoJSONFeature): Promise<void> {
     const map = this.map;
-    const feature = event.features?.[0];
-    if (!map || !feature || feature.geometry.type !== 'Point') {
+    if (!map || feature.geometry.type !== 'Point') {
       return;
     }
     const source = map.getSource<maplibregl.GeoJSONSource>(STATIONS_SOURCE);
@@ -299,8 +492,7 @@ export class StationMapComponent implements OnDestroy {
     map.easeTo({ center: feature.geometry.coordinates as [number, number], zoom });
   }
 
-  private selectStation(event: maplibregl.MapLayerMouseEvent): void {
-    const id = event.features?.[0]?.properties['id'] as number | undefined;
+  private selectStation(id: number): void {
     const station = this.stations().find((s) => s.id === id);
     if (station) {
       this.stationSelected.emit(station);
